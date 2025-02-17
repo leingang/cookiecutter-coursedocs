@@ -49,7 +49,10 @@ end
 -- Run the vc script before generating
 table.insert(typesetsuppfiles,"vc*")
 function docinit_hook()
-    local cmd = "sh ./vc -f -m"
+    -- uncomment one of these for shell or lua-based 
+    --recording of version control info
+    local cmd = "texlua ./vc.lua -f -m"
+    -- local cmd = "sh ./vc -f -m"
     print("Running '" .. cmd .. "'")
     errorlevel = run(typesetdir,cmd)
     assert(errorlevel == 0, 
