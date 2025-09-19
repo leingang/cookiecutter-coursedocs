@@ -46,7 +46,7 @@
     [{% now 'local', '%Y/%m/%d' %} v0.0 {{cookiecutter.course_name}}, {{cookiecutter.term_name}}, {{cookiecutter.exam_name}}]
 \title{{cookiecutter.exam_name | embrace }}
 \author{{ cookiecutter.course_name | embrace }}
-\date{{ "{" }}{{cookiecutter.exam_date | localize_date }}{{ "}" }}
+\date{{ cookiecutter.exam_date | localize_date | embrace }}
 {% raw %}
 \usepackage[insidebox
 %<solutions>,answers
