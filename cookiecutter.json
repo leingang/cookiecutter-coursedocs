@@ -11,5 +11,6 @@
     "has_versions" : false,
     "versions_csv" : "{% if cookiecutter.has_versions %}A,B,C{% endif %}",
     "bundle_name": "",
+    "install_dir" : "",
     "_extensions": ["local_extensions.localize_date", "local_extensions.embrace"]
 }

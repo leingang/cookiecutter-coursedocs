@@ -187,7 +187,7 @@ next_version = next_version_latex
 
 
 -- l3build install --full will install the pdfs in the directory below
-options['texmfhome'] = maindir .. '/../Share/'
+options['texmfhome'] = "{{ cookiecutter.install_dir }}"
 -- TODO set sourcefiles to nil only during installation
 tdslocations = {'*.*.pdf',"*.dtx"}
 
