@@ -9,6 +9,7 @@
     "site_id" : "",
     "number_copies" : 45,
     "has_versions" : false,
+    "use_nyu_fonts": false,
     "versions_csv" : "{% if cookiecutter.has_versions %}A,B,C{% endif %}",
     "bundle_name": "",
     "install_dir" : "",

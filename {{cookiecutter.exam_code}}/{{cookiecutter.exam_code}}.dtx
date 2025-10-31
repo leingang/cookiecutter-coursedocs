@@ -52,6 +52,9 @@
 %<solutions>,answers
 ,nowatermark
 ]{automultiplechoice}
+{% endraw %}
+{% if cookiecutter.use_nyu_fonts -%}
+{% raw %}
 \usepackage{iftex}
 \iftutex
   \usepackage{fontspec}
@@ -76,9 +79,17 @@
 \else
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
-  \usepackage{mathptmx}
-  \usepackage{helvet}
+  \usepackage{charter}
+  \usepackage{montserrat}
 \fi
+{% endraw %}
+{%- else %}
+{% raw %}
+\usepackage{charter}
+\usepackage{montserrat}
+{% endraw %}
+{%- endif %}
+{% raw %}
 \usepackage{titling}
 \usepackage{changepage}%      For the `adjustwidth' environment
 \usepackage{markversion}
