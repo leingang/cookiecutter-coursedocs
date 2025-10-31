@@ -1,7 +1,7 @@
 import re
 import sys
 
-has_versions = "{{ cookiecutter.has_versions }}"
+has_versions = {{ cookiecutter.has_versions }}
 versions_csv = "{{ cookiecutter.versions_csv }}"
 
 
