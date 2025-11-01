@@ -7,6 +7,13 @@ def embrace(s: str) -> str:
     """Enclose string with braces
 
     Useful to avoid lots of escaped braces in the template
+
+    Examples
+    --------
+    >>> embrace('x')
+    '{x}'
+    >>> embrace('')
+    '{}'
     """
     return "{" + s + "}"
 
@@ -19,14 +26,28 @@ def strftime(dts: str, format: str = "%B %-d, %Y, %-i:%M %P") -> str:
 
 @simple_filter
 def localize_date(dts: str) -> str:
-    """Format date according to local configuration"""
+    """Format date according to local configuration
+
+    Examples
+    --------
+    >>> localize_date('2025-10-31')
+    'October 31, 2025'
+    """
     d_format = "%B %-d, %Y"
     return datetime.fromisoformat(dts).strftime(d_format)
 
 
 @simple_filter
 def localize_datetime(dts: str) -> str:
-    """Format date according to local configuration"""
+    """Format date according to local configuration
+
+    Examples
+    --------
+    >>> localize_datetime('2025-10-31T09:05:00')
+    'October 31, 2025, 9:05 a.m.'
+    >>> localize_datetime('2025-10-31T13:05:00')
+    'October 31, 2025, 1:05 p.m.'
+    """
     dt = datetime.fromisoformat(dts)
     dt_format = "%B %-d, %Y, %-i:%M %p"
     # Exception; am/pm should be lower case with periods,
