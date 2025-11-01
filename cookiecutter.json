@@ -10,7 +10,9 @@
     "number_copies" : 45,
     "has_versions" : false,
     "use_nyu_fonts": false,
-    "versions_csv" : "{% if cookiecutter.has_versions %}A,B,C{% endif %}",
+    "versions_csv" : "",
+    "versions_with_solutions": "",
+    "version_randomization_groups" : "",
     "bundle_name": "",
     "install_dir" : "",
     "_extensions": ["local_extensions.localize_date", "local_extensions.embrace"]

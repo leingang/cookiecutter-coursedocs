@@ -1,8 +1,8 @@
 import re
 import sys
 
-has_versions = {{ cookiecutter.has_versions }}
-versions_csv = "{{ cookiecutter.versions_csv }}"
+has_versions = {{ cookiecutter['has_versions'] }}
+versions_csv = "{{ cookiecutter['versions_csv'] }}"
 
 
 def is_valid_version(x: str) -> bool:

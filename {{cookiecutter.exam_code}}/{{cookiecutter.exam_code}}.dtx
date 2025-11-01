@@ -5,10 +5,22 @@
 {%- set bgroup = "{" -%}
 {%- set egroup = "}" -%}
 {%- macro random_int() %}{% for n in [0,1,2,3,4,5,6] %}{{ [0,1,2,3,4,5,6,7,8,9]|random }}{% endfor %}{% endmacro -%}
-{%- if cookiecutter.has_versions -%}
-{%- set versions = cookiecutter.versions_csv.split(',') -%}
+{%- if cookiecutter['has_versions'] -%}
+{%- set versions = cookiecutter['versions_csv'].split(',') -%}
 {%- else -%}
 {%- set versions = None -%}
+{%- endif -%}
+{#-
+  Determine which versions should have separate solution files.
+  If the cookiecutter context provides `versions_with_solutions`, use that
+  CSV; otherwise default to all versions (when versions is set).
+-#}
+{%- if cookiecutter.get('versions_with_solutions') -%}
+{%- set versions_with_solutions = cookiecutter['versions_with_solutions'].split(',') -%}
+{%- elif versions -%}
+{%- set versions_with_solutions = versions -%}
+{%- else -%}
+{%- set versions_with_solutions = None -%}
 {%- endif -%}
 %<*driver>
 %%!TEX TS-program = dtxmake
@@ -18,8 +30,10 @@
 \generate{
 {%- if versions -%}
 {%- for v in versions %}
-    \file{\jobname-{{v}}.qns.tex}{\from{\jobname.dtx}{questions,{{v}}}}
-    \file{\jobname-{{v}}.sol.tex}{\from{\jobname.dtx}{questions,solutions,{{v}}}}
+  \file{\jobname-{{v}}.qns.tex}{\from{\jobname.dtx}{questions,{{v}}}}
+  {%- if versions_with_solutions is none or (v in versions_with_solutions) %}
+  \file{\jobname-{{v}}.sol.tex}{\from{\jobname.dtx}{questions,solutions,{{v}}}}
+  {%- endif -%}
 {%- endfor -%}
 {%- else -%}
     \file{\jobname.qns.tex}{\from{\jobname.dtx}{questions}}
@@ -37,7 +51,9 @@
 {%- if versions -%}
 {%- for v in versions %}
 %<{{v}}&questions&!solutions>{{ (cookiecutter.exam_code + "-" + v + ".qns.tex") | embrace }}
+{%- if versions_with_solutions is none or (v in versions_with_solutions) %}
 %<{{v}}&questions&solutions>{{ (cookiecutter.exam_code + "-" + v + ".sol.tex") | embrace }}
+{%- endif -%}
 {%- endfor -%}
 {%- else %}
 %<questions&!solutions>{{ (cookiecutter.exam_code + ".qns.tex") | embrace }}

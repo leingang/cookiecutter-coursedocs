@@ -126,6 +126,8 @@ def test_doctests_hooks_in_rendered_template(tmp_path: Path):
             "has_versions": False,
             "use_nyu_fonts": False,
             "versions_csv": "",
+            "versions_with_solutions": "",
+            "version_randomization_groups": "",
             "bundle_name": "",
             "install_dir": "",
             "_extensions": [
