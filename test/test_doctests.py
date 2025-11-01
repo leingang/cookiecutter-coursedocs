@@ -38,6 +38,17 @@ def _iter_python_files(root: Path = ROOT):
             continue
         if p.name.startswith("test_"):
             continue
+        # Skip files that appear to be Jinja/Cookiecutter templates. Some
+        # repository files (hooks, templates) include `{{ cookiecutter.* }}`
+        # markers which are not valid Python until rendered. Avoid importing
+        # those template sources during doctest discovery.
+        try:
+            txt = p.read_text()
+        except Exception:
+            # If we can't read the file for any reason, skip it.
+            continue
+        if ("{{ cookiecutter" in txt) or ("{{" in txt and "}}" in txt) or ("{%" in txt):
+            continue
         yield p
 
 
