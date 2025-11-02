@@ -158,7 +158,7 @@
           \node[circled choice] (char) {#1};}}
   \renewcommand\choicelabel{\circled{\Alph{choice}}}
   \CorrectChoiceEmphasis{% 
-      	ikzset{circled choice/.append style={fill=NyuViolet}}%
+      	\tikzset{circled choice/.append style={fill=NyuViolet}}%
       \color{NyuViolet}%
       \bfseries}
   \checkboxchar{\circled{\phantom{A}}}
