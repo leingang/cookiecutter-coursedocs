@@ -11,41 +11,18 @@ Both tests run cookiecutter via `python -m cookiecutter` so the same Python
 interpreter is used. The generated project is written to a temporary output
 directory (so the repository is not modified).
 """
+
 from pathlib import Path
 import json
 import subprocess
-import sys
-
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
-
-
-def _run_cookiecutter_with_replay(replay_path: Path, output_dir: Path, env=None) -> int:
-    """Run cookiecutter on the repo template with the given replay file.
-
-    Returns the subprocess return code.
-    """
-    cmd = [
-        sys.executable,
-        "-m",
-        "cookiecutter",
-        str(REPO_ROOT),
-        "--replay-file",
-        str(replay_path),
-        "--output-dir",
-        str(output_dir),
-        "--accept-hooks",
-        "no",
-    ]
-    proc = subprocess.run(cmd, capture_output=True, text=True, env=env)
-    # For debugging during test runs, attach stdout/stderr when non-zero
-    if proc.returncode != 0:
-        # Print to stderr via pytest capture, helpful when a test fails.
-        print("--- cookiecutter stdout ---")
-        print(proc.stdout)
-        print("--- cookiecutter stderr ---")
-        print(proc.stderr)
-    return proc.returncode
+from test.test_utils import (
+    REPO_ROOT,
+    default_replay_context,
+    write_replay,
+    prepare_env,
+    run_cookiecutter_with_replay,
+    read_generated_dtx,
+)
 
 
 def test_cookiecutter_replay_fails(tmp_path: Path):
@@ -59,17 +36,16 @@ def test_cookiecutter_replay_fails(tmp_path: Path):
     output_dir = tmp_path / "out_fail"
     output_dir.mkdir()
 
-    env = dict(**{k: v for k, v in __import__('os').environ.items()})
-    # isolate user config/replay dirs to tmp
-    env['HOME'] = str(tmp_path)
-    env['XDG_CONFIG_HOME'] = str(tmp_path / '.config')
-
+    env = prepare_env(tmp_path)
     try:
-        rc = _run_cookiecutter_with_replay(replay, output_dir, env=env)
-        assert rc > 0, "Expected cookiecutter to exit with a non-zero return code"
+        proc = run_cookiecutter_with_replay(replay, output_dir, env=env)
+        assert (
+            proc.returncode > 0
+        ), "Expected cookiecutter to exit with a non-zero return code"
     finally:
         if output_dir.exists():
             import shutil
+
             shutil.rmtree(output_dir)
 
 
@@ -98,25 +74,32 @@ def test_cookiecutter_replay_succeeds(tmp_path: Path):
             "version_randomization_groups": "",
             "bundle_name": "",
             "install_dir": "",
-            "_extensions": ["local_extensions.localize_date", "local_extensions.embrace"],
+            "_extensions": [
+                "local_extensions.localize_date",
+                "local_extensions.embrace",
+            ],
         }
     }
 
-    replay = tmp_path / "valid_replay.json"
-    replay.write_text(json.dumps(valid_context))
+    replay = write_replay(tmp_path, valid_context, name="valid_replay.json")
     output_dir = tmp_path / "out_success"
     output_dir.mkdir()
 
-    env = dict(**{k: v for k, v in __import__('os').environ.items()})
-    env['HOME'] = str(tmp_path)
-    env['XDG_CONFIG_HOME'] = str(tmp_path / '.config')
-
+    env = prepare_env(tmp_path)
     try:
-        rc = _run_cookiecutter_with_replay(replay, output_dir, env=env)
-        assert rc == 0, "Expected cookiecutter to succeed (return code 0) with a valid replay file"
+        proc = run_cookiecutter_with_replay(replay, output_dir, env=env)
+        if proc.returncode != 0:
+            print("--- cookiecutter stdout ---")
+            print(proc.stdout)
+            print("--- cookiecutter stderr ---")
+            print(proc.stderr)
+        assert (
+            proc.returncode == 0
+        ), "Expected cookiecutter to succeed (return code 0) with a valid replay file"
     finally:
         if output_dir.exists():
             import shutil
+
             shutil.rmtree(output_dir)
 
 
@@ -145,22 +128,28 @@ def test_cookiecutter_replay_versions_with_solutions(tmp_path: Path):
             "version_randomization_groups": "",
             "bundle_name": "",
             "install_dir": "",
-            "_extensions": ["local_extensions.localize_date", "local_extensions.embrace"],
+            "_extensions": [
+                "local_extensions.localize_date",
+                "local_extensions.embrace",
+            ],
         }
     }
 
-    replay = tmp_path / "valid_replay_versions.json"
-    replay.write_text(json.dumps(valid_context))
+    replay = write_replay(tmp_path, valid_context, name="valid_replay_versions.json")
     output_dir = tmp_path / "out_success_versions"
     output_dir.mkdir()
 
-    env = dict(**{k: v for k, v in __import__('os').environ.items()})
-    env['HOME'] = str(tmp_path)
-    env['XDG_CONFIG_HOME'] = str(tmp_path / '.config')
-
+    env = prepare_env(tmp_path)
     try:
-        rc = _run_cookiecutter_with_replay(replay, output_dir, env=env)
-        assert rc == 0, "Expected cookiecutter to succeed (return code 0) with versions_with_solutions provided"
+        proc = run_cookiecutter_with_replay(replay, output_dir, env=env)
+        if proc.returncode != 0:
+            print("--- cookiecutter stdout ---")
+            print(proc.stdout)
+            print("--- cookiecutter stderr ---")
+            print(proc.stderr)
+        assert (
+            proc.returncode == 0
+        ), "Expected cookiecutter to succeed (return code 0) with versions_with_solutions provided"
 
         # Inspect the generated project to ensure the template honored
         # `versions_with_solutions`. The generated project should contain
@@ -168,16 +157,16 @@ def test_cookiecutter_replay_versions_with_solutions(tmp_path: Path):
         # versions A and B include solutions, and C does not.
         gen_dir = output_dir / "q01"
         assert gen_dir.exists(), f"generated directory not found: {gen_dir}"
-        dtx_path = gen_dir / "q01.dtx"
-        assert dtx_path.exists(), f"expected dtx file not found: {dtx_path}"
-        dtx_txt = dtx_path.read_text(encoding='utf-8')
+
+        dtx_txt = read_generated_dtx(gen_dir, exam_code="q01")
 
         # docstrip markers look like: %<A&questions&solutions> or similar
-        assert "%<A&questions&solutions>" in dtx_txt or "%<A&questions&solutions" in dtx_txt
-        assert "%<B&questions&solutions>" in dtx_txt or "%<B&questions&solutions" in dtx_txt
+        assert "%<A&questions&solutions" in dtx_txt
+        assert "%<B&questions&solutions" in dtx_txt
         # Version C should not have a solutions marker
-        assert "%<C&questions&solutions>" not in dtx_txt and "%<C&questions&solutions" not in dtx_txt
+        assert "%<C&questions&solutions" not in dtx_txt
     finally:
         if output_dir.exists():
             import shutil
+
             shutil.rmtree(output_dir)

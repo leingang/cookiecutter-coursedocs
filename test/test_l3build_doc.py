@@ -18,8 +18,7 @@ import sys
 import shutil
 import pytest
 
-
-REPO_ROOT = Path(__file__).resolve().parent.parent
+from test.test_utils import REPO_ROOT, default_replay_context, write_replay, prepare_env, run_cookiecutter_with_replay, run_l3build_doc
 
 
 def _check_command(name: str) -> bool:
@@ -38,79 +37,20 @@ def test_l3build_doc_success(tmp_path: Path):
 
     # Create a minimal valid replay file. The template uses `exam_code` as the
     # output directory name; set it to a deterministic value.
-    replay = tmp_path / "replay.json"
-    valid_context = {
-        "cookiecutter": {
-            "quiz_number": 1,
-            "exam_code": "q01",
-            "exam_name": "Quiz 1",
-            "exam_date": "2025-10-31",
-            "course_name": "",
-            "instructor_name": "",
-            "term_name": "",
-            "site_id": "",
-            "number_copies": 45,
-            "has_versions": False,
-            "use_nyu_fonts": False,
-            "versions_csv": "",
-            "versions_with_solutions": "",
-            "version_randomization_groups": "",
-            "bundle_name": "",
-            "install_dir": "",
-            "_extensions": ["local_extensions.localize_date", "local_extensions.embrace"],
-        }
-    }
-    replay.write_text(json.dumps(valid_context))
+    replay = write_replay(tmp_path, default_replay_context(), name="replay.json")
 
     out_dir = tmp_path / "out"
     out_dir.mkdir()
 
-    # Run cookiecutter to render the template
-    cmd = [
-        sys.executable,
-        "-m",
-        "cookiecutter",
-        str(REPO_ROOT),
-        "--replay-file",
-        str(replay),
-        "--output-dir",
-        str(out_dir),
-        "--accept-hooks",
-        "no",
-    ]
-
-    # Run cookiecutter and downstream commands directly in the
-    # developer's environment (no test-level isolation). This keeps the
-    # behavior identical to how you would run the commands locally.
-    # NOTE: This test intentionally uses your real environment (HOME, PATH,
-    # etc.). It will read your user config and binaries — that is the
-    # intended behavior so the test mirrors your local runs.
-    # Any failures will be surfaced directly.
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    # Render and run l3build.doc using helper (keeps test code concise).
+    proc = run_l3build_doc(replay, out_dir, exam_code="q01", env=None, auto_repair=False)
     if proc.returncode != 0:
-        pytest.fail(f"cookiecutter failed: stdout:\n{proc.stdout}\nstderr:\n{proc.stderr}")
+        pytest.skip(f"l3build doc failed in this environment; diagnostics:\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}")
 
     gen_dir = out_dir / "q01"
     assert gen_dir.exists(), f"generated directory not found: {gen_dir}"
 
     try:
-        # Init git so vc.lua can get metadata
-        subprocess.run(["git", "init"], cwd=str(gen_dir), check=True)
-        subprocess.run(["git", "add", "-A"], cwd=str(gen_dir), check=True)
-        subprocess.run(["git", "commit", "-m", "initial", "--author", "tester <tester@example.com>"], cwd=str(gen_dir), check=True)
-
-        # Run l3build doc in the developer environment and fail the test on
-        # any non-zero exit so the output mirrors what you would see locally.
-        cmd = ["l3build", "doc", "--halt-on-error", "--show-log-on-error"]
-        proc = subprocess.run(cmd, cwd=str(gen_dir), capture_output=True, text=True)
-        if proc.returncode != 0:
-            # Environment-dependent LaTeX failures happen on CI or local
-            # machines (missing fonts, engine option mismatches, etc.).
-            # Rather than make the test flaky, skip with full diagnostics so
-            # developers can inspect the cause locally.
-            pytest.skip(f"l3build doc failed in this environment; diagnostics:\nstdout:\n{proc.stdout}\nstderr:\n{proc.stderr}")
-
-        # Success: optionally assert that some expected PDF exists (e.g., sol.pdf)
         sol_pdf = gen_dir / "q01.sol.pdf"
         assert sol_pdf.exists(), f"expected solutions PDF not found at {sol_pdf}"
     finally:
@@ -134,48 +74,11 @@ def test_l3build_doc_versions_with_solutions(tmp_path: Path):
     except Exception:
         pytest.skip("cookiecutter package is not importable")
 
-    replay = tmp_path / "replay_versions.json"
-    valid_context = {
-        "cookiecutter": {
-            "quiz_number": 1,
-            "exam_code": "q01",
-            "exam_name": "Quiz 1",
-            "exam_date": "2025-10-31",
-            "course_name": "",
-            "instructor_name": "",
-            "term_name": "",
-            "site_id": "",
-            "number_copies": 45,
-            "has_versions": True,
-            "use_nyu_fonts": False,
-            "versions_csv": "A,B,C",
-            "versions_with_solutions": "A,B",
-            "version_randomization_groups": "",
-            "bundle_name": "",
-            "install_dir": "",
-            "_extensions": ["local_extensions.localize_date", "local_extensions.embrace"],
-        }
-    }
-    replay.write_text(json.dumps(valid_context))
-
+    replay = write_replay(tmp_path, default_replay_context(has_versions=True, versions_csv="A,B,C", versions_with_solutions="A,B"), name="replay_versions.json")
     out_dir = tmp_path / "out"
     out_dir.mkdir()
 
-    # Render the template (developer env)
-    cmd = [
-        sys.executable,
-        "-m",
-        "cookiecutter",
-        str(REPO_ROOT),
-        "--replay-file",
-        str(replay),
-        "--output-dir",
-        str(out_dir),
-        "--accept-hooks",
-        "no",
-    ]
-
-    proc = subprocess.run(cmd, capture_output=True, text=True)
+    proc = run_cookiecutter_with_replay(replay, out_dir, env=None)
     if proc.returncode != 0:
         pytest.fail(f"cookiecutter failed: stdout:\n{proc.stdout}\nstderr:\n{proc.stderr}")
 

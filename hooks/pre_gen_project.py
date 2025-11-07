@@ -3,6 +3,8 @@ import sys
 
 has_versions = {{ cookiecutter['has_versions'] }}
 versions_csv = "{{ cookiecutter['versions_csv'] }}"
+versions_with_solutions = "{{ cookiecutter['versions_with_solutions'] }}"
+
 
 
 def is_valid_version(x: str) -> bool:
@@ -54,3 +56,15 @@ if (__name__ == '__main__'):
             )
             print("Version codes must be alphanumeric (letters and/or digits only).")
             sys.exit(1)
+        # If the user provided a `versions_with_solutions` CSV, ensure every
+        # version listed there is one of the declared versions in
+        # `versions_csv`.
+        if versions_with_solutions:
+            vws = [v.strip() for v in versions_with_solutions.split(",") if v.strip()]
+            missing = [v for v in vws if v not in versions]
+            if missing:
+                print(
+                    f"Error: The following versions listed in 'versions_with_solutions' are not present in 'versions_csv': {', '.join(missing)}"
+                )
+                print("Please ensure all versions_with_solutions entries appear in versions_csv.")
+                sys.exit(1)
