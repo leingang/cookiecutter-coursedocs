@@ -14,7 +14,7 @@ directory (so the repository is not modified).
 
 from pathlib import Path
 import json
-import subprocess
+import shutil
 from test.test_utils import (
     REPO_ROOT,
     default_replay_context,
@@ -44,8 +44,6 @@ def test_cookiecutter_replay_fails(tmp_path: Path):
         ), "Expected cookiecutter to exit with a non-zero return code"
     finally:
         if output_dir.exists():
-            import shutil
-
             shutil.rmtree(output_dir)
 
 
@@ -98,8 +96,6 @@ def test_cookiecutter_replay_succeeds(tmp_path: Path):
         ), "Expected cookiecutter to succeed (return code 0) with a valid replay file"
     finally:
         if output_dir.exists():
-            import shutil
-
             shutil.rmtree(output_dir)
 
 
@@ -167,6 +163,65 @@ def test_cookiecutter_replay_versions_with_solutions(tmp_path: Path):
         assert "%<C&questions&solutions" not in dtx_txt
     finally:
         if output_dir.exists():
-            import shutil
-
             shutil.rmtree(output_dir)
+
+def test_cookiecutter_replay_version_randomization_groups(tmp_path: Path):
+    """Run cookiecutter with a replay file that enables versions and
+    specifies which versions should have the same randomization seed.
+    """
+    valid_context = {
+        "cookiecutter": {
+            "quiz_number": 1,
+            "exam_code": "q01",
+            "exam_name": "Quiz 1",
+            "exam_date": "2025-10-31",
+            "course_name": "",
+            "instructor_name": "",
+            "term_name": "",
+            "site_id": "",
+            "number_copies": 45,
+            "use_nyu_fonts": False,
+            "has_versions": True,
+            "versions_csv": "A,B,C",
+            "versions_with_solutions": "",
+            "version_randomization_groups": "A;B,C",
+            "bundle_name": "",
+            "install_dir": "",
+            "_extensions": [
+                "local_extensions.localize_date",
+                "local_extensions.embrace",
+            ],
+        }
+    }
+
+    replay = write_replay(tmp_path, valid_context, name="valid_replay_versions.json")
+    output_dir = tmp_path / "out_success_versions"
+    output_dir.mkdir()
+
+    env = prepare_env(tmp_path)
+    try:
+        proc = run_cookiecutter_with_replay(replay, output_dir, env=env)
+        if proc.returncode != 0:
+            print("--- cookiecutter stdout ---")
+            print(proc.stdout)
+            print("--- cookiecutter stderr ---")
+            print(proc.stderr)
+        assert (
+            proc.returncode == 0
+        ), "Expected cookiecutter to succeed (return code 0) with version_randomization_groups provided"
+
+        # Inspect the generated project to ensure the template honored
+        # `version_randomization_groups`. The generated project should contain
+        # a `q01.dtx` (exam_code + .dtx). 
+        gen_dir = output_dir / "q01"
+        assert gen_dir.exists(), f"generated directory not found: {gen_dir}"
+
+        dtx_txt = read_generated_dtx(gen_dir, exam_code="q01")
+
+        # docstrip markers look like: %<A&questions&solutions> or similar
+        assert "%<A|B>\\def\\randomseed" in dtx_txt
+        assert "%<C>\\def\\randomseed" in dtx_txt
+    finally:
+        ...
+        # if output_dir.exists():
+        #     shutil.rmtree(output_dir)

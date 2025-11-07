@@ -16,7 +16,9 @@ def render_hook(template_text: str, cookiecutter_context: dict) -> str:
     return tmpl.render(cookiecutter=cookiecutter_context)
 
 
-def run_rendered_hook(rendered_text: str, tmp_path: Path) -> subprocess.CompletedProcess:
+def run_rendered_hook(
+    rendered_text: str, tmp_path: Path
+) -> subprocess.CompletedProcess:
     target = tmp_path / "pre_gen_project_rendered.py"
     target.write_text(rendered_text, encoding="utf8")
     # Run as a script so the main block executes
@@ -24,13 +26,21 @@ def run_rendered_hook(rendered_text: str, tmp_path: Path) -> subprocess.Complete
 
 
 @pytest.mark.parametrize(
-    "versions_csv, versions_with_solutions, expect_success",
+    "versions_csv, versions_with_solutions, version_randomization_groups, expect_success",
     [
-        ("A,B,C", "A,B", True),
-        ("A,B", "C", False),
+        ("A,B,C", "A,B", "", True),
+        ("A,B", "C", "", False),
+        ("A,B,C", "", "A;B,C", True),
+        ("A,B,C", "", "A;D,C", False),
     ],
 )
-def test_pre_gen_project_validation(tmp_path: Path, versions_csv, versions_with_solutions, expect_success):
+def test_pre_gen_project_validation(
+    tmp_path: Path,
+    versions_csv,
+    versions_with_solutions,
+    version_randomization_groups,
+    expect_success,
+):
     template_text = HOOK_PATH.read_text(encoding="utf8")
 
     cookiecutter_ctx = {
@@ -38,6 +48,7 @@ def test_pre_gen_project_validation(tmp_path: Path, versions_csv, versions_with_
         "versions_csv": versions_csv,
         # note: the hook expects the literal string for versions_with_solutions
         "versions_with_solutions": versions_with_solutions,
+        "version_randomization_groups": version_randomization_groups
     }
 
     rendered = render_hook(template_text, cookiecutter_ctx)
@@ -45,9 +56,13 @@ def test_pre_gen_project_validation(tmp_path: Path, versions_csv, versions_with_
     proc = run_rendered_hook(rendered, tmp_path)
 
     if expect_success:
-        assert proc.returncode == 0, f"Expected success, got {proc.returncode}\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
+        assert (
+            proc.returncode == 0
+        ), f"Expected success, got {proc.returncode}\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
         # should not print the validation error
         assert "not present in" not in proc.stdout
     else:
-        assert proc.returncode != 0, f"Expected failure, got 0\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
+        assert (
+            proc.returncode != 0
+        ), f"Expected failure, got 0\nSTDOUT:\n{proc.stdout}\nSTDERR:\n{proc.stderr}"
         assert "not present in" in proc.stdout

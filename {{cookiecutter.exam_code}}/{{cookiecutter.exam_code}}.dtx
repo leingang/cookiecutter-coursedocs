@@ -230,13 +230,11 @@
 \usepackage{tikz}
 \usetikzlibrary{MATH-UA-123-fall22}
 
-% Update the seed below to keep from copy & pasting the same one
-% from quiz to quiz.
 {% endraw -%}
-% This one was generated {% now 'local', '%c' %} 
-{%- if versions -%}
-{%- for v in versions %}
-%<{{v}}>\def\randomseed{{ random_int() | embrace }}
+% Random seed(s) generated {% now 'local', '%c' %} 
+{%- if cookiecutter.get('version_randomization_groups') -%}
+{%- for g in cookiecutter.version_randomization_groups.split(',') %}
+%<{%- for v in g.split(';') -%}{{v}}{% if not loop.last %}|{% endif %}{%- endfor -%}>\def\randomseed{{ random_int() | embrace }}
 {%- endfor -%}
 {%- else %}
 \def\randomseed{{ random_int() | embrace }}
