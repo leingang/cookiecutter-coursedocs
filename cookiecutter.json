@@ -21,7 +21,10 @@
     "use_nyu_fonts": true,
     "has_versions" : false,
     "versions_csv" : "{% if cookiecutter.has_versions %}A,B,C{% endif %}",
+    "versions_with_solutions": "",
+    "version_randomization_groups" : "",
     "bundle_name": "",
+    "install_dir" : "",
     "_copy_without_render": [
         "support"
     ],
