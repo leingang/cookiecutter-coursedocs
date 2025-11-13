@@ -146,30 +146,33 @@
 \xpatchcmd{\answerline}{\CorrectChoice@Emphasis}{\CorrectAnswer@Style}{}{\PatchFailed}
 
 \shadedsolutions % needs color package
-% multiple choice circles, needs tikz package
-%:TODO make more like AMC
-\tikzset{circled choice/.style={
-    draw=MediumViolet2,
-    shape=circle,
-    minimum size=1.25em,
-    inner sep=0pt,
-    thick,
-    text=LightViolet1,
-    font=\sffamily
-}}
-\newcommand*\circled[1]{\tikz[baseline=(char.base)]{%
-        \node[circled choice] (char) {#1};}}
-\renewcommand\choicelabel{\circled{\Alph{choice}}}
-\CorrectChoiceEmphasis{%
-    \tikzset{circled choice/.append style={fill=NyuViolet}}%
-    \color{NyuViolet}%
-    \bfseries}
-\checkboxchar{\circled{\phantom{A}}}
-\checkedchar{\tikzset{circled choice/.append style={fill=NyuViolet}}\circled{\phantom{A}}}
-\renewcommand{\questionshook}{%
-    \settowidth{\leftmargin}{0pt}}
-\renewcommand{\choiceshook}{\settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}}
-\renewcommand{\checkboxeshook}{\settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}}
+
+\ifnyuexam@circlechoices
+  % multiple choice circles, needs tikz package
+  %:TODO make more like AMC
+  \tikzset{circled choice/.style={
+      draw=MediumViolet2,
+      shape=circle,
+      minimum size=1.25em,
+      inner sep=0pt,
+      thick,
+      text=LightViolet1,
+      font=\sffamily
+  }}
+  \newcommand*\circled[1]{\tikz[baseline=(char.base)]{%
+          \node[circled choice] (char) {#1};}}
+  \renewcommand\choicelabel{\circled{\Alph{choice}}}
+  \CorrectChoiceEmphasis{% 
+      	\tikzset{circled choice/.append style={fill=NyuViolet}}%
+      \color{NyuViolet}%
+      \bfseries}
+  \checkboxchar{\circled{\phantom{A}}}
+  \checkedchar{\tikzset{circled choice/.append style={fill=NyuViolet}}\circled{\phantom{A}}}
+  \renewcommand{\questionshook}{%
+      \settowidth{\leftmargin}{0pt}}
+  \renewcommand{\choiceshook}{\settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}}
+  \renewcommand{\checkboxeshook}{\settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}}
+\fi
 \makeatother
 
 \setlength\linefillheight{36pt}
