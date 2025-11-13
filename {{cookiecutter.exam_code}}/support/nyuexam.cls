@@ -24,9 +24,14 @@
 \LoadClass[11pt]{exam}
 
 % metadata
-\newcommand{\course}[2][\relax]{%
+\NewCommandCopy{\old@title}{\title}
+\RenewDocumentCommand{\title}{O{#2}m}{
+    \gdef\@short@title{#1}
+    \old@title{#2}
+}
+\NewDocumentCommand{\course}{O{#2}m}{
+    \gdef\@short@course{#1}
     \gdef\@course{#2}
-    \xdef\@short@course{\ifx#1\relax#2\else#1\fi}
 }
 \usepackage{amsmath,
    amssymb,
@@ -115,7 +120,7 @@
 \newcommand{\headerfont}{\sffamily\color{DeepViolet}}
 \header% all non-cover pages
     {\headerfont\@short@course}
-    {\headerfont\@title}
+    {\headerfont\@short@title}
     {\headerfont\@date}
     \coverrunningheader% cover pages except the first cover page
     {\run@lhead}
@@ -141,33 +146,30 @@
 \xpatchcmd{\answerline}{\CorrectChoice@Emphasis}{\CorrectAnswer@Style}{}{\PatchFailed}
 
 \shadedsolutions % needs color package
-
-\ifnyuexam@circlechoices
-  % multiple choice circles, needs tikz package
-  %:TODO make more like AMC
-  \tikzset{circled choice/.style={
-      draw=MediumViolet2,
-      shape=circle,
-      minimum size=1.25em,
-      inner sep=0pt,
-      thick,
-      text=LightViolet1,
-      font=\sffamily
-  }}
-  \newcommand*\circled[1]{\tikz[baseline=(char.base)]{%
-          \node[circled choice] (char) {#1};}}
-  \renewcommand\choicelabel{\circled{\Alph{choice}}}
-  \CorrectChoiceEmphasis{% 
-      	\tikzset{circled choice/.append style={fill=NyuViolet}}%
-      \color{NyuViolet}%
-      \bfseries}
-  \checkboxchar{\circled{\phantom{A}}}
-  \checkedchar{\tikzset{circled choice/.append style={fill=NyuViolet}}\circled{\phantom{A}}}
-  \renewcommand{\questionshook}{%
-      \settowidth{\leftmargin}{0pt}}
-  \renewcommand{\choiceshook}{\settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}}
-  \renewcommand{\checkboxeshook}{\settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}}
-\fi
+% multiple choice circles, needs tikz package
+%:TODO make more like AMC
+\tikzset{circled choice/.style={
+    draw=MediumViolet2,
+    shape=circle,
+    minimum size=1.25em,
+    inner sep=0pt,
+    thick,
+    text=LightViolet1,
+    font=\sffamily
+}}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{%
+        \node[circled choice] (char) {#1};}}
+\renewcommand\choicelabel{\circled{\Alph{choice}}}
+\CorrectChoiceEmphasis{%
+    \tikzset{circled choice/.append style={fill=NyuViolet}}%
+    \color{NyuViolet}%
+    \bfseries}
+\checkboxchar{\circled{\phantom{A}}}
+\checkedchar{\tikzset{circled choice/.append style={fill=NyuViolet}}\circled{\phantom{A}}}
+\renewcommand{\questionshook}{%
+    \settowidth{\leftmargin}{0pt}}
+\renewcommand{\choiceshook}{\settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}}
+\renewcommand{\checkboxeshook}{\settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}}
 \makeatother
 
 \setlength\linefillheight{36pt}
