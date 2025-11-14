@@ -170,8 +170,12 @@
   \checkedchar{\tikzset{circled choice/.append style={fill=NyuViolet}}\circled{\phantom{A}}}
   \renewcommand{\questionshook}{%
       \settowidth{\leftmargin}{0pt}}
-  \renewcommand{\choiceshook}{\settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}}
-  \renewcommand{\checkboxeshook}{\settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}}
+  \renewcommand{\choiceshook}{%
+    \settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}%
+    \setlength{\itemsep}{2\itemsep}}
+  \renewcommand{\checkboxeshook}{%
+    \settowidth{\leftmargin}{\circled{W}.\hskip\labelsep\hskip 0em}
+    \setlength{\itemsep}{2\itemsep}}
 \fi
 \makeatother
 
@@ -227,3 +231,7 @@
 \patchcmd{\numstrqinrange}{\arabic}{\numberstring}{}{\PatchFailed}
 
 \newenvironment{hint}{\par\noindent\textit{Hint.}}{}
+
+% Make all math display style
+\usepackage{everyhook}
+\PushPostHook{math}{\displaystyle}
