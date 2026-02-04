@@ -49,6 +49,14 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
     - For example, if you have versions `A`, `B`, `C`, `D` to be set in the main classroom, and you want a student
     with identifer `ms2025` to have a custom version but still version A, then `version_randomization_groups` can be set to `"A;ms2025,B,C,D"`
 
+- `extra_latex_packages` (string)
+    - Comma-separated list of additional LaTeX packages to include via `\usepackage{}` in the generated .tex sources.
+    - Example: `"amsfonts,mathtools,calcii-fall23"`.
+
+- `extra_tikz_libraries` (string)
+    - Comma-separated list of additional TikZ libraries to include via `\usetikzlibrary{}`.
+    - Example: `"angles,quotes,calc"`.
+
 - `bundle_name` (string)
     - Optional output bundle name for packaging the generated materials.
 
@@ -61,19 +69,15 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
 
 ## Automatic testing
 
-There are some automated tests to make sure the process works.
-Just run:
-
-    pytest
 
 ## Manual testing
 
-There is a sample config file in the `test` directory. So
+There are sample config files in the `test` directory. So
 you can run:
 
-    cookiecutter --config-file test/course.yml .
+    cookiecutter --config-file test/course-0120-1264-011.yml .
 
 Replay files
-- You can use Cookiecutter's `--replay-file` feature to render the template non-interactively in tests or CI. The tests under `test/` create a small replay JSON that supplies these keys so generation is deterministic for automated runs.
+- You can use Cookiecutter's `--replay-file` feature to render the template non-interactively in tests or CI. 
 
 

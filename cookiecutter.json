@@ -17,5 +17,6 @@
     "extra_tikz_libraries" : "",
     "bundle_name": "",
     "install_dir" : "",
-    "_extensions": ["local_extensions.localize_date", "local_extensions.embrace"]
+    "_extensions": ["local_extensions.localize_date", "local_extensions.embrace"],
+    "_copy_without_render": ["support"]
 }
