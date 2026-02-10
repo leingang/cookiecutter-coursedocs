@@ -1,0 +1,501 @@
+{# This is a Jinja2 template for a latex file.  Both use braces heavily! 
+    We use the raw ... endraw statements to surround untouched latex. 
+    We use the `embrace` filter to enclose an argument with braces. 
+    Braces can also be quoted with the `bgroup` and `egroup` variables
+    or with `{{ "{" }}` and  `{{ "}" }}`.
+#}
+{%- set bgroup = "{" -%}
+{%- set egroup = "}" -%}
+{%- macro random_int() %}{% for n in [0,1,2,3,4,5,6] %}{{ [0,1,2,3,4,5,6,7,8,9]|random }}{% endfor %}{% endmacro -%}
+{%- if cookiecutter.has_versions -%}
+{%- set versions = cookiecutter.versions_csv.split(',') | map('trim') | list -%}
+{%- else -%}
+{%- set versions = None -%}
+{%- endif -%}
+{#-
+  Determine which versions should have separate solution files.
+  If the cookiecutter context provides `versions_with_solutions`, use that
+  CSV; otherwise default to all versions (when versions is set).
+-#}
+{%- if cookiecutter.get('versions_with_solutions') -%}
+{%- set versions_with_solutions = cookiecutter['versions_with_solutions'].split(',') -%}
+{%- elif versions -%}
+{%- set versions_with_solutions = versions -%}
+{%- else -%}
+{%- set versions_with_solutions = None -%}
+{%- endif -%}
+%<*driver>
+%%!TEX TS-program = dtxmake
+%%!TEX dtxmake-subengine = lualatexmk
+\input docstrip.tex
+\askforoverwritefalse
+\generate{
+{%- if versions -%}
+{%- for v in versions %}
+  \file{\jobname-{{v}}.qns.tex}{\from{\jobname.dtx}{questions,{{v}}}}
+  {%- if versions_with_solutions is none or (v in versions_with_solutions) %}
+  \file{\jobname-{{v}}.sol.tex}{\from{\jobname.dtx}{questions,solutions,{{v}}}}
+  {%- endif -%}
+{%- endfor -%}
+{%- else -%}
+    \file{\jobname.qns.tex}{\from{\jobname.dtx}{questions}}
+    \file{\jobname.sol.tex}{\from{\jobname.dtx}{questions,solutions}}
+{%- endif %}
+}
+\endbatchfile
+%</driver>
+%<*questions>
+\documentclass[addpoints
+%<solutions>,answers
+{% if cookiecutter.use_nyu_fonts -%}
+,nyufonts
+{%- endif %}
+{% if cookiecutter.use_bubble_sheet -%}
+,nocirclechoices
+{%- endif -%}
+]{{ bgroup }}nyuexam{{ egroup }}
+\ProvidesFile
+%<*dtx>
+{{ (cookiecutter.exam_code + ".dtx") | embrace }}
+%</dtx>
+{%- if versions -%}
+{%- for v in versions %}
+%<{{v}}&questions&!solutions>{{ (cookiecutter.exam_code + "-" + v + ".qns.tex") | embrace }}
+{%- if versions_with_solutions is none or (v in versions_with_solutions) %}
+%<{{v}}&questions&solutions>{{ (cookiecutter.exam_code + "-" + v + ".sol.tex") | embrace }}
+{%- endif -%}
+{%- endfor -%}
+{%- else %}
+%<questions&!solutions>{{ (cookiecutter.exam_code + ".qns.tex") | embrace }}
+%<questions&solutions>{{ (cookiecutter.exam_code + ".sol.tex") | embrace }}
+{%- endif %}
+    [{% now 'local', '%Y/%m/%d' %} v0.0 {{cookiecutter.course_name}}, {{cookiecutter.term_name}}, {{cookiecutter.exam_name}}]
+\title{{cookiecutter.exam_name | embrace }}
+\author{{cookiecutter.instructor_name | replace('. ', '.~') | embrace }}
+\date{{cookiecutter.exam_date | localize_date | embrace }}
+\course{{ cookiecutter.course_name | embrace }}
+{% raw %}
+
+\usepackage{markversion}% Sets \VCRevisionMod and provides \UseVersionOf
+\footer% all non-cover pages
+    {\UseVersionOf{\jobname.tex}, \UseDateOf{\jobname.tex}}
+    {\thepage/\numpages}
+    {Revision \VCRevisionMod}
+\makeatletter
+\coverfooter% footer on cover pages only
+    {\run@lfoot}
+    {}
+    {\run@rfoot}
+\makeatother
+
+
+
+\usepackage[overload]{exam-randomizechoices}
+% Update the seed below to keep from copy & pasting the same one
+% from exam to exam.
+{% endraw -%}
+% Random seed(s) generated {% now 'local', '%c' %} 
+{%- if cookiecutter.get('version_randomization_groups') -%}
+{%- for g in cookiecutter.version_randomization_groups.split(',') %}
+%<{%- for v in g.split(';') -%}{{v}}{% if not loop.last %}|{% endif %}{%- endfor -%}>\def\randomseed{{ random_int() | embrace }}
+{%- endfor -%}
+{%- else %}
+\def\randomseed{{ random_int() | embrace }}
+{%- endif %}
+{% raw -%}
+\setrandomizerseed{\randomseed}
+\pgfmathsetseed{\randomseed}
+\directlua{math.randomseed(token.get_macro("randomseed"))}
+\usepackage{luacode}
+
+
+\newcommand{\tf}[1][{}]{%
+  \fillin[#1][2em]%
+}
+
+\setlength{\answerskip}{1cm}
+
+% points of question types
+\newcommand{\mcpoints}{3}% multiple choice
+\newcommand{\mspoints}{5}% multiple select (check all that apply)
+\newcommand{\tfpoints}{3}% true/false
+
+\usepackage{siunitx}% \qty command
+\usepackage{discrete}
+\usetikzlibrary{discrete}
+
+{%- endraw -%}
+{%- if cookiecutter.icons_package == 'marvosym' -%}
+{%- raw %}
+\let\Cross\relax
+\usepackage{marvosym} %\Stopsign
+\newcommand{\iconstop}{\Stopsign}
+{% endraw -%}
+{%- elif cookiecutter.icons_package == 'fontawesome5' -%}
+{%- raw %}
+\usepackage{fontawesome5}
+\newcommand{\iconstop}{\faHandPaper[regular]}
+{% endraw -%}
+{%- else %}
+% No icons package detected. Probably gonna get an error later on.
+{% endif -%}
+{%- raw -%}
+\newcommand{\mystop}{\raisebox{-0.5\totalheight}{\fontsize{50}{60}\color{Magenta}\selectfont\iconstop}}
+
+\begin{document}
+
+\begin{coverpages}
+    \vspace*{\fill}
+    \maketitle
+    {\setlength{\parindent}{0pt}%
+    \begin{minipage}[b]{8cm}
+        \hfill\fbox{
+            \begin{minipage}[b][1.35cm][t]{.9\linewidth}
+              Name:
+    
+              \ifprintanswers\sffamily\Huge\color{UltraViolet} Solutions\fi
+            \end{minipage}
+      }\hfill\vspace{5ex}
+    \end{minipage}
+    \begin{minipage}[b]{8cm}
+        \hfill\fbox{
+            \begin{minipage}[b][1.35cm][t]{.9\linewidth}
+              NetID:
+            \end{minipage}
+      }\hfill\vspace{5ex}
+    \end{minipage}
+    \hspace*{\fill}
+    }
+    
+\bigskip
+\begin{instructions}%
+    \noindent{\textbf{\uppercase{READ THE FOLLOWING INFORMATION.}}}
+    
+    \begin{itemize}
+        \item You have \textbf{
+{%- endraw -%}
+{{ cookiecutter.exam_duration }}{{ " " }} 
+{%- raw -%}        
+        minutes} to finish this exam.
+        \item Fixed-response questions on this exam will be graded by computer.
+        Please fill in the circles completely and use pencil in case you want to
+        change your responses.  
+        \item Calculators, books, notes, blank scrap paper, and other aids are not allowed.
+        \item You may use the backs of the pages or the extra pages for scratch work.  
+        \textbf{\emph{Do not unstaple or remove pages}}.
+    \end{itemize}
+
+    
+    
+    {\noindent\mystop
+    \hfill \textbf{\uppercase{Do not begin this exam until signaled to do so.}}
+    \hfill \mystop}
+    
+\end{instructions}
+
+\vfill
+\noindent\rule{\textwidth}{1pt}
+\emph{For office use only}
+
+\noindent\rule{0cm}{1cm}
+E\# \rule{0.75in}{0.4pt}
+S\# \rule{0.75in}{0.4pt}
+CO: \hrulefill\ 
+CI: \hrulefill\ 
+Fin: \hrulefill\ 
+FT \(\Box\)
+\examcleardoublepage
+{% endraw -%}
+{%- if cookiecutter.use_bubble_sheet -%}
+{%- raw -%}
+\ifprintanswers\else
+\thispagestyle{empty}
+\begin{tikzpicture}[
+    overlay,
+    remember picture,
+    whiteout/.style={draw=none,fill=white}
+]
+    \node at (current page.center) {
+{%  endraw -%}
+{% set letters = ['A','B','C','D','E'] %}
+{%- if versions -%}
+{%- for v in versions -%}
+%<{{v}}>\includegraphics{{ ("mc_bubble_sheet_" + letters[loop.index0 % 5]) | embrace}}
+{% endfor -%}
+{%- else %}
+\includegraphics{{ ("mc_bubble_sheet_" + letters[0]) | embrace}}
+{% endif %}
+{%  raw -%}
+};
+    % White out unused rows to avoid confusion
+    % LL = lower left corner of bubble matrix
+    % UR = upper right corner of bubble matrix
+    % the origin is the upper left corner of the page's printed area
+    % (1 inch in each direction from upper left corner of the stock?)
+    \coordinate (LL) at (-0.5in,-9in);
+    \coordinate (UR) at (6.5in,-1.75in); 
+    \coordinate (UL) at (LL |- UR);
+    \coordinate (LR) at (LL -| UR);
+    % white out columns 2-4
+    \draw[whiteout] ([xshift=1.6in]LL) rectangle (UR);
+    % white out blanks 15--25
+    % this needs to be adjusted manually
+    % 1.5in is good for 21--25 (leaving 1--20 visible)
+    % 0.24in per Q and one extra for every five?
+    %: SOMEDAY: Use the Adobe Acrobat measuring tool to make this accurate 
+    \draw[whiteout] (LL) rectangle ++(1.5in,3.12in);
+    \node[draw,align=center,font={\bfseries\sffamily\large},Magenta]
+        at (3.25in,-3in)
+        {\uppercase{Put your name\\on this page too}};
+\end{tikzpicture}
+\fi
+{%- endraw -%}
+{%- endif -%}
+{%- raw %}
+\end{coverpages}
+
+\begin{EnvFullwidth}
+\section*{Multiple Choice}
+{%- endraw -%}
+{% if cookiecutter.use_bubble_sheet -%}
+{%- raw %}
+\begin{instructions}%
+    Shade the circles corresponding to your answers to the multiple choice
+    questions on the bubble sheet. 
+%%    Pages \pageref{begin-fixed-response}--\pageref{end-fixed-response} will not be read.
+    No explanation is required.
+\end{instructions}
+{%- endraw -%}
+{% else -%}
+{%- raw %}
+\begin{instructions}%
+    Shade the circles corresponding to your answers to the multiple choice
+    questions, as in the example below:
+    \begin{center}
+    \begin{minipage}{0.95\textwidth} 
+        \begin{itemize}
+            \item[\samplecirc{A}] Some answer
+            \item[\samplecircSoln{B}] The answer you think is correct
+            \item[\samplecirc{C}] Some answer
+            \item[\samplecirc{D}] Some answer
+            \item[\samplecirc{E}] Some answer
+        \end{itemize}
+    \end{minipage}  
+    \end{center}
+    \medskip
+    No explanation is required to be shown and no partial credit will be given
+    for the multiple choice questions.
+\end{instructions}
+{%- endraw -%}
+{% endif -%}
+{%- raw %}
+\end{EnvFullwidth}
+
+
+\begin{questions}
+    % \vspace*{-0.6in}
+
+{% endraw -%}
+{%- set num_mcq = cookiecutter.num_mcq | int -%}
+{%- if (num_mcq > 0) -%}    
+    \begingradingrange{mc}
+{% for i in range(0,num_mcq) %}    
+    \begin{question}[{{ cookiecutter.points_per_mcq }}]
+        Stem
+        \begin{choices}
+            \CorrectChoice{}
+            \choice{}
+            \choice{}
+            \choice{}
+            \choice{}
+        \end{choices}
+    \end{question}
+{% endfor %}
+    \endgradingrange{mc}
+    \examcleardoublepage%
+{% endif %}
+
+{%- set num_cata = cookiecutter.num_cata | int -%}
+{%- if (num_cata > 0) -%}
+\begin{EnvFullwidth}
+    \section*{Check All That Apply}
+    
+    \begin{instructions}%
+        In the next \numstrqinrange{cata} questions, more than one option \textbf{may} be correct.
+        You must select all correct options and none of the incorrect options to
+        earn full credit.
+    \end{instructions}    
+\end{EnvFullwidth}
+
+    \begingradingrange{cata}
+{% for i in range(0,num_cata) %}    
+    \begin{question}[{{ cookiecutter.points_per_cata }}]
+        Stem
+        \begin{choices}
+            \CorrectChoice{}
+            \CorrectChoice{}
+            \choice{}
+            \choice{}
+            \choice{}
+        \end{choices}
+    \end{question}
+{% endfor %}
+    \endgradingrange{cata}
+    \examcleardoublepage%
+{% endif %}
+
+{%- set num_tf = cookiecutter.num_tf | int -%}
+{%- if (num_tf > 0) -%}
+\begin{EnvFullwidth}
+    \section*{True/False}
+    
+    \begin{instructions}%
+        In the next \numstrqinrange{tfj} questions, indicate if the statement is true (T) or false (F).
+        If the statement is true, give a short justification.
+        If the statement is false, provide a counterexample or explain why.
+    \end{instructions}    
+\end{EnvFullwidth}
+
+    \begingradingrange{tfj}
+{% for i in range(0,num_tf) %}    
+    \begin{question}[{{ cookiecutter.points_per_tf }}]
+        Statement
+        \fillin
+    \end{question}
+{% endfor %}
+    \endgradingrange{tfj}
+    \examcleardoublepage%
+{% endif %}
+{%- raw -%}
+
+    \begingradingrange{fr}%
+    \fullwidth{\section*{Free Response}
+
+    \begin{instructions}%
+        The remaining questions are free response questions or proofs.  Put your
+        answers in the blanks (where provided) and your work/explanations in the
+        space below each problem or problem part.
+
+        For full credit, make sure to follow instructions as given.
+    
+        % https://www.woostercolts.com/cms/lib/NV02000980/Centricity/Shared/pdf/ib/ibmyp/ibmyp-command-terms.pdf
+        \begin{itemize}
+            \item \textbf{State} means to give a specific name, value or other brief answer.
+            \item \textbf{Explain} means to give a detailed account including reasons or causes.
+            \item \textbf{Prove} means to use a sequence of logical steps to formally demonstrate the required result.
+            \item Write complete sentences in English. Do not use the three-dots notation (\(\therefore\) or \(\because\)).
+        \end{itemize}
+    \end{instructions}}
+
+    \question\label{frq-surjinj}
+    Suppose that $A$ and $B$ are sets, and $f \from A \to B$ and $g \from B \to A$ 
+    are functions such that $g \comp f = \IdentityFunction[A]$.
+    \begin{parts}
+        \part[6]\label{frq-composition-inj-surj}
+            Prove that $f$ is injective and $g$ is surjective.
+
+            \begin{solution}
+                Suppose there exist $a_1, a_2 \in A$ such that $f(a_1) = f(a_2)$.
+                Then $g(f(a_1)) = g(f(a_2))$.
+                But $(g \comp f)(a_1) = \IdentityFunction[A](a_1) = a_1$, 
+                and $(g \comp f)(a_2) = \IdentityFunction[A](a_1) = a_2$, 
+                so $a_1 = a_2$.
+                Therefore, $f$ is injective.
+
+                Now suppose $a \in A$; we want to find $b \in B$ such that $g(b) =a$.
+                Let $b = f(a)$. Then
+                \[
+                    g(b) =g(f(a)) = \IdentityFunction[A](a) = a
+                \]
+                which is what we want.
+
+            \end{solution}
+
+        \vspace{\stretch{2}}
+
+
+        \part[4] Give an example of the above scenario in which neither $f$ nor $g$ is a bijection.
+
+        \begin{solution}
+            Answers may vary. Here is one:
+            Let $A = \set{1}$, $B=\set{1,2}$, $f=\set{(1,1)}$, and $g = \set{(1,1),(2,1)}$.
+            Then $f \from A \to B$ is not surjective, and $g \from B \to A$ is not injective.
+            But $g \comp f = \set{(1,1)} = \IdentityFunction[A]$.
+        \end{solution}
+        \vspace{\stretch{1}}
+    \end{parts}
+
+
+    \examcleardoublepage
+    \question\label{frq-kq}
+        We will prove this claim: \emph{for all positive integers \(n\) there exist 
+        unique $k,q \in \N$ such that $q$ is odd and $n=2^k q$.}
+
+        \begin{parts}
+
+            \part[4]
+            Fill in the table to check a few cases:
+            \begin{center}
+                \renewcommand{\arraystretch}{2}%
+                \begin{tabular}{|c|c|c|}\hline
+                    $n$ & $k$ & $q$ \\\hline
+                    20 & \fillin[2] & \fillin[5]\\
+                    21 & \fillin[0] & \fillin[21]\\
+                    22 & \fillin[2] & \fillin[11]\\
+                    23 & \fillin[1] & \fillin[23]\\\hline
+                \end{tabular}    
+            \end{center}
+        
+            \part[8]
+                Prove \emph{by strong induction} the “existence” part of the statement.
+                Hint: every integer is either even or odd.
+
+                \begin{solution}
+                    We use strong induction. The base case $n=1$ is satisfied by
+                    $k=0$ and $q=1$.
+
+                    Now suppose there exists $n$ such that for all integers $m$ 
+                    satisfying $1 \leq m < n$, there exist $k$ and $q$ as above.
+                    Consider $n$.
+
+                    \begin{itemize}
+                        \item If $n$ is odd, $n=2^k q$ is satisfied by $k=0$ and $q=n$.
+                        \item If $n$ is even, then there exists $m$ such that $n = 2m$.
+                            Since $1 \leq m < n$, there exist $k'$ and $q'$ such that
+                            $m=2^{k'}q'$. Then $n = 2^{k'+1}q'$, so we can set $k = k'+1$
+                            and $q=q'$ to satisfy the claim for $n$.
+                    \end{itemize}
+
+                    Therefore by strong induction, all positive integers $n$ satisfy the claim.
+                \end{solution}
+                \vspace{\stretch{1}}
+
+            \newpage
+            \part[4]
+                Prove \emph{by contradiction} the “uniqueness” part of the claim:
+                for all $n$ the pair $(k,q)$ is unique.
+
+                Hint: no integer is \emph{both} even and odd.
+
+                \begin{solution}
+                    Suppose there exist $(k,q)$ and $(k',q')$ such that $n = 2^k
+                    q = 2^{k'}q'$. Either $k \leq k'$ or vice versa; we will
+                    assume the former. We have
+                    \[
+                        2^{k}q = 2^{k'}q' 
+                        \implies  2^k(2^{k'-k}q) = q'
+                    \]
+                    The left-hand side is even, while the right-hand side is odd.
+                    This is a contradiction.
+                \end{solution}
+                \vspace{\stretch{1}}
+        \end{parts}
+    
+        \examcleardoublepage
+
+
+    % Delete/disable the line below to end the exam
+    \end{questions}
+\end{document}
+%</questions>
+{% endraw -%}

@@ -1,0 +1,32 @@
+{
+    "exam_code" : "mt1",
+    "exam_name" : "Midterm Examination I",
+    "exam_date" : "{% now 'local', '%Y-%m-%d' %}",
+    "exam_duration" : 70,
+    "course_name" : "",
+    "instructor_name" : "",
+    "term_name" : "",
+    "site_id" : "",
+    "use_bubble_sheet": true,
+    "num_mcq" : 6,
+    "points_per_mcq" : 3,
+    "num_cata" : 4,
+    "points_per_cata" : 3,
+    "num_tf" : 4,
+    "points_per_tf" : 3,
+    "num_sa" : 0,
+    "num_frq" : 3,
+    "icons_package" : [ "marvosym", "fontawesome5"],
+    "number_copies" : 45,
+    "use_nyu_fonts": true,
+    "has_versions" : false,
+    "versions_csv" : "{% if cookiecutter.has_versions %}A,B,C{% endif %}",
+    "versions_with_solutions": "",
+    "version_randomization_groups" : "",
+    "bundle_name": "",
+    "install_dir" : "",
+    "_copy_without_render": [
+        "support"
+    ],
+    "_extensions": ["local_extensions.localize_date", "local_extensions.embrace"]
+}
