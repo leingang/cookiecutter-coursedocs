@@ -1,0 +1,19 @@
+{
+    "quiz_number" : 1,
+    "exam_code" : "{{ 'q%02d'|format(cookiecutter.quiz_number|int) }}",
+    "exam_name" : "Quiz {{ cookiecutter.quiz_number }}",
+    "exam_date" : "{% now 'local', '%Y-%m-%d' %}",
+    "course_name" : "",
+    "instructor_name" : "",
+    "term_name" : "",
+    "site_id" : "",
+    "number_copies" : 45,
+    "has_versions" : false,
+    "use_nyu_fonts": false,
+    "versions_csv" : "",
+    "versions_with_solutions": "",
+    "version_randomization_groups" : "",
+    "bundle_name": "",
+    "install_dir" : "",
+    "_extensions": ["local_extensions.localize_date", "local_extensions.embrace"]
+}
