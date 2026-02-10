@@ -1,0 +1,19 @@
+{
+    "templates": {
+        "amcquiz": {
+            "path": "./amcquiz",
+            "title": "AMC Quiz",
+            "description": "A quiz using the automultiplechoice package"
+        },
+        "quiz": {
+            "path": "./nyuquiz",
+            "title": "Exam Quiz",
+            "description": "A quiz derived from the exam class"
+        },
+        "exam": {
+            "path" : "./nyuexam",
+            "title" : "Exam",
+            "description" : "An exam"
+        }
+    }
+}
