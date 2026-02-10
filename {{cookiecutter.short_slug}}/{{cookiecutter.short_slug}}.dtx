@@ -1,0 +1,155 @@
+%<*driver>
+%%!TEX TS-program = dtxmake
+%%!TEX dtxmake-subengine = xelatexmk
+
+
+\input docstrip.tex
+\askforoverwritefalse
+\edef\qnspbl{\perCent\space This is a LaTeX file.  It is a text file that is compiled^^J%
+\perCent\space by a program called LaTeX into a pretty PDF file.^^J%
+\perCent\space If you're viewing this file in Overleaf, you'll see that PDF^^J%
+\perCent\space in the window to the right.^^J%
+\perCent^^J%
+\perCent\space This file is for typesetting the QUESTIONS in this homework assignment.^^J%
+\perCent\space You can read the source code to learn more about how specific math^^J%
+\perCent\space expressions are encoded in the LaTeX language. But you will edit a copy^^J%
+\perCent\space of the file '\jobname.ans.tex' instead.^^J%
+\perCent}
+\edef\anspbl{\perCent\space This is a LaTeX file.  It is a text file that is compiled^^J%
+\perCent\space by a program called LaTeX into a pretty PDF file.^^J%
+\perCent\space If you're viewing this file in Overleaf, you'll see that PDF^^J%
+\perCent\space in the window to the right.^^J%
+\perCent^^J%
+\perCent\space This file is for typesetting YOUR ANSWERS to this homework assignment.^^J%
+\perCent\space The LaTeX macro language is complicated, so we have inserted lots of^^J%
+\perCent\space documenting comments into the file.  Comments start with '\perCent'^^J%
+\perCent\space and continue to the end of the line.  In Overleaf's edit window, they^^J%
+\perCent\space are colored green.^^J%
+\perCent\space ^^J%
+\perCent\space Comments prefixed with 'Student:' are relevant to students. Skip any-^^J%
+\perCent\space thing else you don't understand, or ask me.^^J%
+}
+\edef\solpbl{\perCent\space This is a LaTeX file.  It is a text file that is compiled^^J%
+\perCent\space by a program called LaTeX into a pretty PDF file.^^J%
+\perCent\space If you're viewing this file in Overleaf, you'll see that PDF^^J%
+\perCent\space in the window to the right.^^J%
+\perCent^^J%
+\perCent\space This file is for typesetting SOLUTIONS AND REMARKS for this homework^^J
+\perCent\space assignment.  As with the questions file, you can read the source code^^J%
+\perCent\space if you want to know how I typeset the math that appears in the PDF.%
+}
+\generate{
+    \usepreamble\qnspbl\file{\jobname.qns.tex}{\from{\jobname.dtx}{questions}}
+    \usepreamble\solpbl\file{\jobname.sol.tex}{\from{\jobname.dtx}{questions,solutions}}
+}
+\endbatchfile
+%</driver>
+%<*questions>
+\documentclass{article}
+%% This is some font management depending on the TeX “engine” being used.
+%% Nothing to worry about.
+\usepackage{ifxetex}
+\ifxetex
+  \usepackage{fontspec}
+\else
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{lmodern}
+\fi
+
+%% Student: These lines describe some document metadata.
+
+\title{Problem Set {{ cookiecutter.problem_set_number }}}
+
+\usepackage{etoolbox}
+%<answers>\makeatletter\preto{\@title}{Answers to }\makeatother
+%<solutions>\makeatletter\preto{\@title}{Solutions to }\makeatother
+\author{{ '{%' }}{# } #}
+%<!answers>    Prof. Leingang
+%<*answers>
+%% Student: change the next line to your name!
+    Sally Student
+%</answers>
+\\
+{{ cookiecutter.course_number }} {{ cookiecutter.course_name }}
+}
+
+\date{Due {{ cookiecutter.due_date }}}
+
+
+%% These lines set up the question, answer, and solution environments.
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amsmath}
+%<!answers&!solutions>\theoremstyle{definition}
+%<answers|solutions>\theoremstyle{plain}
+\newtheorem{question}{Question}
+
+\newenvironment{answer}[1][Answer]
+    {\begin{proof}[#1]\renewcommand\qedsymbol{$\vartriangle$}}
+    {\end{proof}}
+\newenvironment{solution}[1][Solution]
+    {\begin{proof}[#1]\renewcommand\qedsymbol{$\blacktriangle$}}
+    {\end{proof}}
+% These make enumerates within questions start at the second ("(a)") level, 
+% rather than the first ("1.") level.
+\makeatletter
+    \newcommand{\stepenumdepth}{\advance\@enumdepth\@ne}
+\makeatother
+\AtBeginEnvironment{question}{\stepenumdepth}
+\AtBeginEnvironment{answer}{\stepenumdepth}
+\AtBeginEnvironment{solution}{\stepenumdepth}
+
+\theoremstyle{remark}
+\newtheorem*{hint}{Hint}
+\newtheorem*{note}{Note}
+
+\usepackage{amsmath}
+\usepackage{siunitx}
+\DeclareSIUnit{\pound}{lb}
+\DeclareSIUnit{\mile}{mi}
+\usepackage{bm}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{caption,subcaption}
+
+\usepackage{mathtools}
+\usepackage{pgfplots}
+\newcommand{\pd}[2]{ \frac{\partial #1}{\partial #2} }
+\newcommand{\pdd}[2]{ \frac{\partial^2 #1}{ \partial #2^2} }
+\newcommand{\pdm}[3]{ \frac{\partial^2 #1}{ \partial #3 \partial #2 } }
+\newcommand{\divergence}{\operatorname{div}}
+\pgfplotsset{copy domain/.style={
+    domain=\pgfkeysvalueof{/pgfplots/xmin}:\pgfkeysvalueof{/pgfplots/xmax},
+    y domain=\pgfkeysvalueof{/pgfplots/ymin}:\pgfkeysvalueof{/pgfplots/ymax}
+}}
+\tikzset{
+    point/.style={circle,fill,inner sep=0pt,outer sep=0pt,minimum width=1ex}
+}
+
+\usepackage{hyperref}
+\usepackage{eqnalign}
+%% This is the beginning of the part of the file that describes
+%% the actual text of the document.
+%% That's why it says `\begin{document}' below. :-)
+\begin{document}
+\maketitle
+
+%<*!answers&!solutions>
+%</!answers&!solutions>
+
+
+
+%<*template>
+\begin{question}
+\end{question}
+%<*solutions>
+\begin{solution}
+\end{solution}
+%</solutions>
+%</template>
+\end{document}
+
+
+%</questions>

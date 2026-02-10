@@ -1,0 +1,11 @@
+{
+    "course_number": "",
+    "course_name": "",
+    "section": "",
+    "term": ["Fall", "Spring", "Summer"],
+    "year": "{% now 'local', '%Y' %}",
+    "term_code": "1{{ cookiecutter.year[-2:] }}{{ {'Fall':'8', 'Spring':'4', 'Summer':'6'}[cookiecutter.term] }}",
+    "problem_set_number": "5",
+    "short_slug": "ps{{ '%02d' % cookiecutter.problem_set_number|int }}",
+    "due_date": "{% now 'local', '%B %-d, %Y' %}"
+}
