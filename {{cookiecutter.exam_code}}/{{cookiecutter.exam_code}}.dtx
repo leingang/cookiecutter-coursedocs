@@ -1,0 +1,187 @@
+{# This is a Jinja2 template for a latex file.  Both use braces heavily! 
+    We use the raw ... endraw statements to surround untouched latex 
+    and we have to escape literal braces.
+#}
+{%- set bgroup = "{" -%}
+{%- set egroup = "}" -%}
+{%- set space = " " %}
+{%- macro random_int() %}{% for n in [0,1,2,3,4,5,6] %}{{ [0,1,2,3,4,5,6,7,8,9]|random }}{% endfor %}{% endmacro -%}
+{%- if cookiecutter['has_versions'] -%}
+{%- set versions = cookiecutter['versions_csv'].split(',') -%}
+{%- else -%}
+{%- set versions = None -%}
+{%- endif -%}
+{#-
+  Determine which versions should have separate solution files.
+  If the cookiecutter context provides `versions_with_solutions`, use that
+  CSV; otherwise default to all versions (when versions is set).
+-#}
+{%- if cookiecutter.get('versions_with_solutions') -%}
+{%- set versions_with_solutions = cookiecutter['versions_with_solutions'].split(',') -%}
+{%- elif versions -%}
+{%- set versions_with_solutions = versions -%}
+{%- else -%}
+{%- set versions_with_solutions = None -%}
+{%- endif -%}
+%<*driver>
+%%!TEX TS-program = dtxmake
+%%!TEX dtxmake-subengine = xelatexmk
+\input docstrip.tex
+\askforoverwritefalse
+\generate{
+{%- if versions -%}
+{%- for v in versions %}
+  \file{\jobname-{{v}}.qns.tex}{\from{\jobname.dtx}{questions,{{v}}}}
+  {%- if versions_with_solutions is none or (v in versions_with_solutions) %}
+  \file{\jobname-{{v}}.sol.tex}{\from{\jobname.dtx}{questions,solutions,{{v}}}}
+  {%- endif -%}
+{%- endfor -%}
+{%- else -%}
+    \file{\jobname.qns.tex}{\from{\jobname.dtx}{questions}}
+    \file{\jobname.sol.tex}{\from{\jobname.dtx}{questions,solutions}}
+{%- endif %}
+}
+\endbatchfile
+%</driver>
+%<*questions>
+\documentclass[
+{% if cookiecutter.use_nyu_fonts -%}
+,nyufonts   
+{%- endif %}
+%<solutions>,answers
+]{{ "{" }}nyuquiz{{ "}" }}
+\ProvidesFile
+%<*dtx>
+{{ (cookiecutter.exam_code + ".dtx") | embrace }}
+%</dtx>
+{%- if versions -%}
+{%- for v in versions %}
+%<{{v}}&questions&!solutions>{{ (cookiecutter.exam_code + "-" + v + ".qns.tex") | embrace }}
+{%- if versions_with_solutions is none or (v in versions_with_solutions) %}
+%<{{v}}&questions&solutions>{{ (cookiecutter.exam_code + "-" + v + ".sol.tex") | embrace }}
+{%- endif -%}
+{%- endfor -%}
+{%- else %}
+%<questions&!solutions>{{ (cookiecutter.exam_code + ".qns.tex") | embrace }}
+%<questions&solutions>{{ (cookiecutter.exam_code + ".sol.tex") | embrace }}
+{%- endif %}
+    [{% now 'local', '%Y/%m/%d' %} v0.0 {{cookiecutter.course_name}}, {{cookiecutter.term_name}}, {{cookiecutter.exam_name}}]
+\title{{cookiecutter.exam_name | embrace }}
+\author{{ cookiecutter.course_name | embrace }}
+\date{{ cookiecutter.exam_date | localize_date | embrace }}
+% Random seed(s) generated {% now 'local', '%c' %} 
+{%- if cookiecutter.get('version_randomization_groups') -%}
+{%- for g in cookiecutter.version_randomization_groups.split(',') %}
+%<{%- for v in g.split(';') -%}{{v}}{% if not loop.last %}|{% endif %}{%- endfor -%}>\def\randomseed{{ random_int() | embrace }}
+{%- endfor -%}
+{%- else %}
+\def\randomseed{{ random_int() | embrace }}
+{%- endif %}
+{% raw -%}
+\pgfmathsetseed{\randomseed}
+\usepackage[overload]{exam-randomizechoices}
+\setrandomizerseed{\randomseed}
+\ifluatex
+  \directlua{math.randomseed(token.get_macro("randomseed"))}
+  \usepackage{luacode}
+  % See the luacode manual to understand why we need the \luaexec command here.
+  % Should be single backlash, single percent, in double quotes
+  \luaexec{PERCENT_CHAR = "\%"}
+  \directlua{utils = require("utils")}
+\fi
+
+{%- endraw %}
+{%- if cookiecutter.get('extra_latex_packages') %}
+{% set extra_packages = cookiecutter['extra_latex_packages'].split(',') %}
+{% for pkg in extra_packages -%}
+\usepackage{{ pkg | trim | embrace }}
+{% endfor %}
+{%- endif -%}
+{%- if cookiecutter.get('extra_tikz_libraries') -%}
+{% set extra_libraries = cookiecutter['extra_tikz_libraries'].split(',') -%}
+{%- for lib in extra_packages -%}
+\usetikzlibrary{{ lib | trim | embrace }}
+{% endfor -%}
+{%- endif %}
+{% if cookiecutter.get('quiz_duration') -%}
+\newcommand{\quizduration}{{ cookiecutter.quiz_duration | embrace }}
+{%- else -%}
+\newcommand{\quizduration}{20}
+{%- endif %}
+{%- raw %}    
+
+
+
+\begin{document}
+\maketitle
+\noindent This paper will be scanned and read by optical mark reading software.
+Indicate your selections by filling in the circles \textbf{completely}.
+If you wish to change your selection, erase your marks completely.
+\bigskip
+
+\insertidfields
+
+\iflargeprint
+  \begin{instructions}
+    This is a \quizduration-minute quiz.  
+    There are problems on the front and on the back.
+    Notes and calculators are not allowed. Any student taking 
+    this ``large print'' quiz version is allowed unlimited scrap paper.
+    Please submit all scrap paper when submitting the quiz.
+  \end{instructions}
+\cleardoublepage
+\else
+  \begin{instructions}
+    This is a \quizduration-minute quiz.  
+    There are problems on the front and on the back.
+    Notes, calculators, and scrap paper are not allowed.
+  \end{instructions}
+  \bigskip
+  \bigskip
+\fi 
+
+
+\begin{questions}
+\begin{question}[2]\label{MC-final}
+    On which of these dates is the final exam?
+    \begin{choices}
+        \CorrectChoice{Tuesday, December 18}% correct
+        \choice{Wednesday, December 19}% calculus exams
+        \choice{Monday, December 17}% review session
+        \choice{Thursday, December 20}% commencement
+        \choice{Friday, December 14}% last day of class
+    \end{choices}
+\end{question}
+
+\vspace{\stretch{1}}
+
+\begin{question}[2]\label{MC-cheating}
+    Which of these are examples of academic dishonesty?
+    \begin{checkboxes}
+        \CorrectChoice{Copying the homework of another student without collaboration and citation}
+        \CorrectChoice{Falsifying documents to justify makeup exams}
+        \CorrectChoice{Placing an ad on craiglist seeking someone to take your exam}
+        \CorrectChoice{Asking homework questions on Yahoo! Answers and using answers found there as your own work}
+    \end{checkboxes}
+\end{question}
+
+\vspace{\stretch{1}}
+
+\clearpage
+
+\begin{question}[3]\label{FR-why}
+    Why are you taking this course?  What would you like to learn?
+    \begin{solution}[\stretch{1}]        
+    \end{solution}
+\end{question}
+
+\begin{question}[3]\label{FR-map}
+    Draw a map of your home town, and indicate on the map where you live.
+    \begin{solution}[\stretch{1}]        
+    \end{solution}    
+\end{question}
+
+\end{questions}
+\end{document}
+{% endraw %}   
+%</questions>

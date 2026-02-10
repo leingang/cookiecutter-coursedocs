@@ -1,0 +1,22 @@
+default_context:
+  full_name: "Matthew Leingang"
+  instructor_name: "Prof. Matthew Leingang"
+  email: "leingang@nyu.edu"
+  department_code: "MATH-UA"
+  course_number: "120"
+  section_number: "011+016"
+  term_season: "Spring"
+  term_year: "2026"
+  course_name: "MATH-UA 120.011+016 Discrete Mathematics"
+  short_course_name: "Discrete Math"
+  term_name: "Spring 2026"
+  site_id: "12983673"
+  number_copies: 30
+  bundle_name: coursedocs-0120-1264-011
+# unused
+  localized_date_format: "%B %-d, %Y"
+  localized_datetime_format: "%B %-d, %Y, %-i:%M %p"
+abbreviations:
+  pp: https://github.com/audreyr/cookiecutter-pypackage.git
+  gh: https://github.com/{0}.git
+  bb: https://bitbucket.org/{0}

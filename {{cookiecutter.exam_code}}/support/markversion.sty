@@ -1,0 +1,35 @@
+% mark document with version metadata
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+\RequirePackage{etoolbox}
+\usepackage{readprov}
+\usepackage{draftwatermark}
+\input{vc}
+
+\newif\ifmarkversioninfootnote
+\markversioninfootnotefalse
+\DeclareOption{infootnote}{\markversioninfootnotetrue}
+\DeclareOption{notinfootnote}{\markversioninfootnotefalse}
+\ProcessOptions\relax
+
+\ifdefstring{\VCModified}{1}{
+    \DraftwatermarkOptions{scale=0.5}
+    \SetWatermarkText{\textcolor{LightViolet2}{UNCOMMITTED}}
+}{
+    \ifdefstring{\GITCommitsSinceTag}{0} {
+        \DraftwatermarkOptions{stamp=false}
+    }{
+        \SetWatermarkText{\textcolor{LightViolet2}{UNTAGGED}}
+    }
+}
+\gdef\VCModifiedText{\textcolor{Magenta}{with local modifications}}%
+\ifmarkversioninfootnote
+    \appto{\maketitle}{\blfootnote{%
+        Version \UseVersionOf{\jobname.tex},
+        \UseDateOf{\jobname.tex},
+        Revision \VCRevisionMod.}}
+\fi
