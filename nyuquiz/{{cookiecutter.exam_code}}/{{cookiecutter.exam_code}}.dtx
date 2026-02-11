@@ -105,7 +105,7 @@
 {%- endif -%}
 {%- if cookiecutter.get('extra_tikz_libraries') -%}
 {% set extra_libraries = cookiecutter['extra_tikz_libraries'].split(',') -%}
-{%- for lib in extra_packages -%}
+{%- for lib in extra_libraries -%}
 \usetikzlibrary{{ lib | trim | embrace }}
 {% endfor -%}
 {%- endif %}

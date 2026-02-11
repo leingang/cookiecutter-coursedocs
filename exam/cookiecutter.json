@@ -24,6 +24,8 @@
     "versions_csv" : "{% if cookiecutter.has_versions %}A,B,C{% endif %}",
     "versions_with_solutions": "",
     "version_randomization_groups" : "",
+    "extra_latex_packages" : "",
+    "extra_tikz_libraries" : "",
     "bundle_name": "",
     "install_dir" : "",
     "_copy_without_render": [
