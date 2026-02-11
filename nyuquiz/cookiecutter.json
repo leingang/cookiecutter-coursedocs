@@ -11,6 +11,7 @@
     "number_copies" : 45,
     "has_versions" : false,
     "use_nyu_fonts": false,
+    "use_randomlist": false,
     "versions_csv" : "",
     "versions_with_solutions": "",
     "version_randomization_groups" : "",

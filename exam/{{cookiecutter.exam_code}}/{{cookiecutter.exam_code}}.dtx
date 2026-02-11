@@ -105,6 +105,12 @@
 {% raw -%}
 \setrandomizerseed{\randomseed}
 \pgfmathsetseed{\randomseed}
+{% endraw -%}
+{%- if cookiecutter.get('use_randomlist') -%}
+\usepackage{randomlist}
+\RLsetrandomseed{\randomseed}
+{%- endif -%}
+{%- raw %}
 \directlua{math.randomseed(token.get_macro("randomseed"))}
 \usepackage{luacode}
 

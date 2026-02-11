@@ -19,6 +19,7 @@
     "icons_package" : [ "marvosym", "fontawesome5"],
     "number_copies" : 45,
     "use_nyu_fonts": true,
+    "use_randomlist": false,
     "has_versions" : false,
     "versions_csv" : "{% if cookiecutter.has_versions %}A,B,C{% endif %}",
     "versions_with_solutions": "",

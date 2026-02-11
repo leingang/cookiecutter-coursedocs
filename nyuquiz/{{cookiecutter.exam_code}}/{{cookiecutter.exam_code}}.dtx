@@ -81,6 +81,12 @@
 \pgfmathsetseed{\randomseed}
 \usepackage[overload]{exam-randomizechoices}
 \setrandomizerseed{\randomseed}
+{% endraw -%}
+{%- if cookiecutter.get('use_randomlist') -%}
+\usepackage{randomlist}
+\RLsetrandomseed{\randomseed}
+{%- endif -%}
+{%- raw %}
 \ifluatex
   \directlua{math.randomseed(token.get_macro("randomseed"))}
   \usepackage{luacode}
