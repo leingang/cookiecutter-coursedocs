@@ -9,9 +9,6 @@
 {%- macro random_int() %}{% for n in [0,1,2,3,4,5,6] %}{{ [0,1,2,3,4,5,6,7,8,9]|random }}{% endfor %}{% endmacro -%}
 {%- if cookiecutter.has_versions -%}
 {%- set versions = cookiecutter.versions_csv.split(',') | map('trim') | list -%}
-{%- else -%}
-{%- set versions = None -%}
-{%- endif -%}
 {#-
   Determine which versions should have separate solution files.
   If the cookiecutter context provides `versions_with_solutions`, use that
@@ -23,6 +20,9 @@
 {%- set versions_with_solutions = versions -%}
 {%- else -%}
 {%- set versions_with_solutions = None -%}
+{%- endif -%}
+{%- else -%}
+{%- set versions = None -%}
 {%- endif -%}
 %<*driver>
 %%!TEX TS-program = dtxmake
@@ -95,7 +95,7 @@
 % from exam to exam.
 {% endraw -%}
 % Random seed(s) generated {% now 'local', '%c' %} 
-{%- if cookiecutter.get('version_randomization_groups') -%}
+{%- if versions and cookiecutter.get('version_randomization_groups') -%}
 {%- for g in cookiecutter.version_randomization_groups.split(',') %}
 %<{%- for v in g.split(';') -%}{{v}}{% if not loop.last %}|{% endif %}{%- endfor -%}>\def\randomseed{{ random_int() | embrace }}
 {%- endfor -%}
