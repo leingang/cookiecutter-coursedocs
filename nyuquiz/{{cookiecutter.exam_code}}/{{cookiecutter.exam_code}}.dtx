@@ -68,7 +68,22 @@
     [{% now 'local', '%Y/%m/%d' %} v0.0 {{cookiecutter.course_name}}, {{cookiecutter.term_name}}, {{cookiecutter.exam_name}}]
 \title{{cookiecutter.exam_name | embrace }}
 \author{{ cookiecutter.course_name | embrace }}
+{%- if cookiecutter.get('version_course_names') -%}
+{%- for group in cookiecutter.version_course_names.split(',') %}
+{%- set gv, gname = group.split(':', 1) %}
+%<{%- for v in gv.split(';') -%}{{ v | trim }}{% if not loop.last %}|{% endif %}{%- endfor -%}>\author{{ gname | trim | embrace }}
+{%- endfor -%}
+{%- endif %}
+{%- if cookiecutter.get('version_times') %}
+\date{{ bgroup }}{{ cookiecutter.exam_date | localize_date }}\relax
+{%- for pair in cookiecutter.version_times.split(',') %}
+{%- set v, t = pair.split(':', 1) %}
+%<{{ v | trim }}> {{ t | trim }}
+{%- endfor %}
+{{ egroup }}
+{%- else %}
 \date{{ cookiecutter.exam_date | localize_date | embrace }}
+{%- endif %}
 % Random seed(s) generated {% now 'local', '%c' %} 
 {%- if cookiecutter.get('version_randomization_groups') -%}
 {%- for g in cookiecutter.version_randomization_groups.split(',') %}
