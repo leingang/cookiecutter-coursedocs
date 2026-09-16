@@ -4,7 +4,7 @@ module = "{{cookiecutter.exam_code}}"
 bundle = "{{cookiecutter.bundle_name}}"
 maindir = ".."
 
-version = "0.2a"
+version = "0.0"
 versiondate = "2026-01-30"
 
 
