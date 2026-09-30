@@ -49,6 +49,23 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
     - For example, if you have versions `A`, `B`, `C`, `D` to be set in the main classroom, and you want a student
     with identifer `ms2025` to have a custom version but still version A, then `version_randomization_groups` can be set to `"A;ms2025,B,C,D"`
 
+- `version_course_names` (string template)
+    - Comma-separated list of `versions:course_name` pairs, overriding `\author`
+    for specific versions (e.g. when different sections share a quiz but meet
+    at different times/sections). Versions can be grouped with semicolons to
+    share the same override, just like `version_randomization_groups`.
+    - The base `\author{course_name}` line is always emitted; each pair here
+    adds a docstrip-guarded override line after it.
+    - Example: `"1100;1230:MATH-UA 122.021 Calculus II,1400:MATH-UA 122.016 Calculus II"`
+
+- `version_times` (string template)
+    - Comma-separated list of `version:time` pairs, appended to `\date` as
+    per-version docstrip-guarded lines (e.g. for sections that share a date
+    but meet at different times). When set, `\date` is wrapped in `\relax`
+    followed by one guarded line per version; when empty, `\date` is just
+    the plain `exam_date`.
+    - Example: `"1100:11:00 a.m.,1230:12:30 p.m.,1400:2:00 p.m."`
+
 - `extra_latex_packages` (string)
     - Comma-separated list of additional LaTeX packages to include via `\usepackage{}` in the generated .tex sources.
     - Example: `"amsfonts,mathtools,calcii-fall23"`.
