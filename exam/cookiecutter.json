@@ -4,6 +4,7 @@
     "exam_date" : "{% now 'local', '%Y-%m-%d' %}",
     "exam_duration" : 70,
     "course_name" : "",
+    "short_course_name" : "{{ cookiecutter.course_name }}",
     "instructor_name" : "",
     "term_name" : "",
     "site_id" : "",

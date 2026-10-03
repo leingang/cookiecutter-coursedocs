@@ -67,11 +67,13 @@
 {%- endif %}
     [{% now 'local', '%Y/%m/%d' %} v0.0 {{cookiecutter.course_name}}, {{cookiecutter.term_name}}, {{cookiecutter.exam_name}}]
 \title{{cookiecutter.exam_name | embrace }}
-\author{{ cookiecutter.course_name | embrace }}
+\author{{ cookiecutter.instructor_name | replace('. ', '.~') | embrace }}
+{%- set short_course_opt = '[' ~ cookiecutter.short_course_name ~ ']' if cookiecutter.get('short_course_name') and cookiecutter.short_course_name != cookiecutter.course_name else '' %}
+\course{{ short_course_opt }}{{ cookiecutter.course_name | embrace }}
 {%- if cookiecutter.get('version_course_names') -%}
 {%- for group in cookiecutter.version_course_names.split(',') %}
 {%- set gv, gname = group.split(':', 1) %}
-%<{%- for v in gv.split(';') -%}{{ v | trim }}{% if not loop.last %}|{% endif %}{%- endfor -%}>\author{{ gname | trim | embrace }}
+%<{%- for v in gv.split(';') -%}{{ v | trim }}{% if not loop.last %}|{% endif %}{%- endfor -%}>\course{{ short_course_opt }}{{ gname | trim | embrace }}
 {%- endfor -%}
 {%- endif %}
 {%- if cookiecutter.get('version_times') %}

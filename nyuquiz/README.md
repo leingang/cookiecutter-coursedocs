@@ -22,6 +22,10 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
 - `course_name`, `instructor_name`, `term_name`, `site_id` (strings)
     - Optional metadata strings used in headers/footers and in generated LaTeX sources.
 
+- `short_course_name` (string template)
+    - Shorter course name for the quiz header (e.g. `MATH-UA 120`). Defaults to `course_name`.
+    - Emitted as `\course[short_course_name]{course_name}`; the optional argument is omitted when the two are equal.
+
 - `number_copies` (int)
     - How many copies to print per student (or per version). Default: `45`.
 
@@ -50,12 +54,12 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
     with identifer `ms2025` to have a custom version but still version A, then `version_randomization_groups` can be set to `"A;ms2025,B,C,D"`
 
 - `version_course_names` (string template)
-    - Comma-separated list of `versions:course_name` pairs, overriding `\author`
+    - Comma-separated list of `versions:course_name` pairs, overriding `\course`
     for specific versions (e.g. when different sections share a quiz but meet
     at different times/sections). Versions can be grouped with semicolons to
     share the same override, just like `version_randomization_groups`.
-    - The base `\author{course_name}` line is always emitted; each pair here
-    adds a docstrip-guarded override line after it.
+    - The base `\course[short_course_name]{course_name}` line is always emitted; each pair here
+    adds a docstrip-guarded override line after it, keeping `short_course_name` for the header.
     - Example: `"1100;1230:MATH-UA 122.021 Calculus II,1400:MATH-UA 122.016 Calculus II"`
 
 - `version_times` (string template)

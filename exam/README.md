@@ -19,6 +19,14 @@ This will generate an `l3build` module.
 
 * `exam_duration`: Length of the exam in minutes.
 
+* `course_name`: The full course name, printed on the cover page
+  (e.g. `MATH-UA 120 Discrete Mathematics`).
+
+* `short_course_name`: A shorter course name for the page header
+  (e.g. `MATH-UA 120`). Defaults to `course_name`. When it differs from
+  `course_name`, it is passed as the optional argument:
+  `\course[short_course_name]{course_name}`.
+
 * `use_nyu_fonts` [y/n]: Use the NYU fonts NYU Perstare and Frank Ruhl Libre. User is in charge of downloading and installing these fonts.
 
 * `has_versions`: Set this to `y` if you want several versions of the same exam.
@@ -44,6 +52,7 @@ multiple versions, each will get its own seed.
   exam is given to multiple sections). Versions can be grouped with
   semicolons to share an override. The base `\course{course_name}` line is
   always emitted; each pair here adds a docstrip-guarded override after it.
+  Overrides keep `short_course_name` as the header name.
   Example: `"6A;6B:MATH-UA 122.006 Calculus II,16A;16B:MATH-UA 122.016 Calculus II"`
 
 * `version_times`: Comma-separated list of `version:time` pairs, appended to

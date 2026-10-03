@@ -8,6 +8,7 @@ default_context:
   term_season: "Spring"
   term_year: "2026"
   course_name: "MATH-UA 122.011 Calculus II"
+  short_course_name: "MATH-UA 122"
   term_name: "Spring 2026"
   site_id: "12983673"
   number_copies: 30

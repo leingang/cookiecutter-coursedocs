@@ -7,6 +7,7 @@ default_context:
   term_season: "Fall"
   term_year: "2023"
   course_name: "MATH-UA 123.003 Calculus III"
+  short_course_name: "MATH-UA 123"
   term_name: "Fall 2023"
   site_id: "306456"
   number_copies: 50
