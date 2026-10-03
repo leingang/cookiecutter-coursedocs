@@ -47,12 +47,12 @@
 %<*questions>
 \documentclass[addpoints
 %<solutions>,answers
-{% if cookiecutter.use_nyu_fonts -%}
+{%- if cookiecutter.use_nyu_fonts %}
 ,nyufonts
 {%- endif %}
-{% if cookiecutter.use_bubble_sheet -%}
+{%- if cookiecutter.use_bubble_sheet %}
 ,nocirclechoices
-{%- endif -%}
+{%- endif %}
 ]{{ bgroup }}nyuexam{{ egroup }}
 \ProvidesFile
 %<*dtx>

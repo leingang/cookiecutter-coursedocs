@@ -45,8 +45,8 @@
 %</driver>
 %<*questions>
 \documentclass[
-{% if cookiecutter.use_nyu_fonts -%}
-,nyufonts   
+{%- if cookiecutter.use_nyu_fonts %}
+,nyufonts
 {%- endif %}
 %<solutions>,answers
 ]{{ "{" }}nyuquiz{{ "}" }}
