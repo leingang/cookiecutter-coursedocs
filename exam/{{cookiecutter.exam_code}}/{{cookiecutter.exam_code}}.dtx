@@ -114,6 +114,11 @@
 {%- if versions and cookiecutter.get('version_randomization_groups') -%}
 {%- for g in cookiecutter.version_randomization_groups.split(',') %}
 %<{%- for v in g.split(';') -%}{{v}}{% if not loop.last %}|{% endif %}{%- endfor -%}>\def\randomseed{{ random_int() | embrace }}
+{%- endfor %}
+% Shared by all versions, so \GetVersionItem gives each version a different item
+\def\sharedseed{{ random_int() | embrace }}
+{%- for g in cookiecutter.version_randomization_groups.split(',') %}
+%<{%- for v in g.split(';') -%}{{v}}{% if not loop.last %}|{% endif %}{%- endfor -%}>\def\versionindex{{ loop.index | string | embrace }}
 {%- endfor -%}
 {%- else %}
 \def\randomseed{{ random_int() | embrace }}
@@ -125,6 +130,7 @@
 {%- if cookiecutter.get('use_randomlist') -%}
 \usepackage{randomlist}
 \RLsetrandomseed{\randomseed}
+\usepackage{versionlist}
 {%- endif -%}
 {%- raw %}
 \ifluatex

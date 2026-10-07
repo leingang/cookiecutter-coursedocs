@@ -53,6 +53,14 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
     - For example, if you have versions `A`, `B`, `C`, `D` to be set in the main classroom, and you want a student
     with identifer `ms2025` to have a custom version but still version A, then `version_randomization_groups` can be set to `"A;ms2025,B,C,D"`
 
+- Distinct bank items per version (`use_randomlist` only)
+    - With multiple versions, the template also defines `\sharedseed` (one seed for all versions)
+    and `\versionindex` (1, 2, … per randomization group), and loads `support/versionlist.sty`.
+    - `\GetVersionItem{<list>}{<macro>}` is a drop-in replacement for randomlist's `\GetRandomItem`
+    that guarantees each randomization group a *different* item: every version shuffles the list the
+    same way and takes the item at position `\versionindex`. The list needs at least one item per
+    group, or the build stops with an error.
+
 - `version_course_names` (string template)
     - Comma-separated list of `versions:course_name` pairs, overriding `\course`
     for specific versions (e.g. when different sections share a quiz but meet

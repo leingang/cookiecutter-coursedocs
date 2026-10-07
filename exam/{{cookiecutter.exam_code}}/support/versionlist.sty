@@ -1,0 +1,37 @@
+% Version-distinct draws from randomlist lists
+%
+% \GetVersionItem{<list>}{<macro>} is a drop-in replacement for
+% \GetRandomItem.  Every version of the document shuffles <list> the same
+% way, using \sharedseed, and takes the item at position \versionindex.
+% So each version gets a different item.  Define, before loading:
+%
+%   \def\sharedseed{<one seed for all versions>}
+%   %<0930>\def\versionindex{1}
+%   %<1100>\def\versionindex{2}  ... and so on, one index per
+%                                     randomization group.
+%
+% The list needs at least as many items as there are versions.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{versionlist}[2026/10/07 v1.0 Version-distinct draws from randomlist lists]
+\RequirePackage{randomlist}
+\directlua{versionlist = require("versionlist")}
+
+\providecommand\versionindex{1}
+
+\newcommand\GetVersionItem[2]{%
+  \ifdefined\sharedseed\else
+    \PackageWarning{versionlist}{%
+      \string\sharedseed\space is undefined; using \string\randomseed.\MessageBreak
+      Versions may not get distinct items}%
+    \edef\sharedseed{\randomseed}%
+  \fi
+  \ifnum\versionindex>\RL@lenof{#1}\relax
+    \PackageError{versionlist}{%
+      List #1 has \RL@lenof{#1} items, but this is version \versionindex}{%
+      Add items to the list so there is at least one per version.}%
+  \else
+    \edef\VL@index{\directlua{tex.sprint(versionlist.pick(
+      \RL@lenof{#1}, "\sharedseed", "\luaescapestring{#1}", \versionindex))}}%
+    \GetItem{#1}{\VL@index}{#2}%
+  \fi
+}

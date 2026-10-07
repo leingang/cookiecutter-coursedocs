@@ -45,6 +45,14 @@ multiple versions, each will get its own seed.
   seed. Defaults to `versions_csv`, meaning every version gets its own seed.
   Example: `"A;B,C,D"` gives A and B the same seed, C and D each their own.
 
+* `\GetVersionItem{<list>}{<macro>}`: with `use_randomlist`, the template also
+  defines `\sharedseed` (one seed for all versions) and `\versionindex` (1, 2,
+  … per randomization group), and loads `support/versionlist.sty`. This
+  drop-in replacement for randomlist's `\GetRandomItem` guarantees each
+  randomization group a *different* item from a bank: every version shuffles
+  the list the same way and takes the item at position `\versionindex`. The
+  list needs at least one item per group, or the build stops with an error.
+
 ## Per-version overrides
 
 * `version_course_names`: Comma-separated list of `versions:course_name`
