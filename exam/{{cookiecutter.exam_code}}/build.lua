@@ -18,7 +18,7 @@ unpackexe    = "latex" -- required because of the \ProvidesFile
 supportdir = "support"
 typesetfiles = {"*.*.tex"}
 typesetexe = "lualatex"
-typesetsuppfiles = {"*.png", "*.pdf", "*.sty", "*.cls", "*.lua"}
+typesetsuppfiles = {"*.png", "*.pdf", "*.sty", "*.cls", "*.lua", "*.tex"}
 
 tagfiles = {"*.dtx", "*.lua"}
 

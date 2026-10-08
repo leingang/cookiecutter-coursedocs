@@ -50,10 +50,13 @@
 {%- if cookiecutter.use_nyu_fonts %}
 ,nyufonts
 {%- endif %}
+{%- if cookiecutter.get('use_barcode') %}
+,barcode
+{%- endif %}
 {%- if cookiecutter.use_bubble_sheet %}
 ,nocirclechoices
 {%- endif %}
-]{{ bgroup }}nyuexam{{ egroup }}
+]{{ bgroup }}nyuexam3{{ egroup }}
 \ProvidesFile
 %<*dtx>
 {{ (cookiecutter.exam_code + ".dtx") | embrace }}
@@ -140,6 +143,11 @@
   % Should be single backlash, single percent, in double quotes
   \luaexec{PERCENT_CHAR = "\%"}
   \directlua{utils = require("utils")}
+  % Write the answer key to \jobname.csv (question, answer, points)
+  \ifprintanswers
+    \directlua{aux_to_csv = require("aux_to_csv")}
+    \directlua{aux_to_csv.register_for_job(tex.jobname)}
+  \fi
 \fi
 
 {% endraw -%}
@@ -165,9 +173,14 @@
 \setlength{\answerskip}{1cm}
 
 % points of question types
-\newcommand{\mcpoints}{3}% multiple choice
-\newcommand{\mspoints}{5}% multiple select (check all that apply)
-\newcommand{\tfpoints}{3}% true/false
+\newcommand{\mcpoints}{
+{%- endraw -%}
+{{ cookiecutter.points_per_mcq }}
+{%- raw -%}
+}% multiple choice
+\newcommand{\mspoints}{1}% each option of a check-all-that-apply group
+\newcommand{\tfpoints}{1}% truth value of a true/false statement
+\newcommand{\tfrpoints}{2}% reason for a true/false statement
 
 \usepackage{siunitx}% \qty command
 
@@ -188,6 +201,8 @@
 {% endif -%}
 {%- raw -%}
 \newcommand{\mystop}{\raisebox{-0.5\totalheight}{\fontsize{50}{60}\color{Magenta}\selectfont\iconstop}}
+
+\input{command-verbs.tex}% glossary of command terms (explain, prove, ...)
 
 \begin{document}
 
@@ -251,16 +266,34 @@ CO: \hrulefill\
 CI: \hrulefill\ 
 Fin: \hrulefill\ 
 FT \(\Box\)
-\examcleardoublepage
+\clearpage
+\printglossaries
+\label{command-verbs-glossary}
+\clearpage
 {% endraw -%}
 {%- if cookiecutter.use_bubble_sheet -%}
+{#- 
+    Bubble rows used: one per MCQ, five per check-all group, two per T/F statement.
+    The sheet has columns of 25 rows. Row spacing was calibrated on
+    Fall 2026 Discrete Midterm I: 0.2375in per row, plus 0.25in between groups of five.
+-#}
+{%- set nrows = (cookiecutter.num_mcq | int) + 5 * (cookiecutter.num_cata | int) + 2 * (cookiecutter.num_tf | int) -%}
+{%- if nrows <= 25 -%}
+{%- set first_unused = nrows + 1 -%}
+{%- else -%}
+{%- set first_unused = nrows - 25 + 1 -%}
+{%- endif -%}
+{%- set ns = namespace(gaps=0) -%}
+{%- for m in range(first_unused, 25) -%}{%- if m % 5 == 0 -%}{%- set ns.gaps = ns.gaps + 1 -%}{%- endif -%}{%- endfor -%}
+{%- set whiteout_height = 0.06 + 0.2375 * (26 - first_unused) + 0.25 * ns.gaps -%}
 {%- raw -%}
 \ifprintanswers\else
 \thispagestyle{empty}
 \begin{tikzpicture}[
     overlay,
     remember picture,
-    whiteout/.style={draw=none,fill=white}
+    whiteout/.style={draw=none,fill=white},
+    highlightbox/.style={draw=Magenta,line width=1.8pt,rounded corners=4pt}
 ]
     \node at (current page.center) {
 {%  endraw -%}
@@ -283,18 +316,67 @@ FT \(\Box\)
     \coordinate (UR) at (6.5in,-1.75in); 
     \coordinate (UL) at (LL |- UR);
     \coordinate (LR) at (LL -| UR);
+    % highlight Name/NetID fields at the top of the bubble sheet
+    \draw[highlightbox] ([xshift=0.12in,yshift=1.10in]UL) rectangle ++(3.4in,1.1in);
+{%- endraw %}
+    % {{ nrows }} bubble rows are used.
+    % Heights are computed by the cookiecutter; check the rendered page and adjust if needed.
+{%- if nrows <= 25 %}
     % white out columns 2-4
     \draw[whiteout] ([xshift=1.6in]LL) rectangle (UR);
-    % white out blanks 15--25
-    % this needs to be adjusted manually
-    % 1.5in is good for 21--25 (leaving 1--20 visible)
-    % 0.24in per Q and one extra for every five?
-    %: SOMEDAY: Use the Adobe Acrobat measuring tool to make this accurate 
-    \draw[whiteout] (LL) rectangle ++(1.5in,3.12in);
-    \node[draw,align=center,font={\bfseries\sffamily\large},Magenta]
+    % white out rows {{ nrows + 1 }}--25 in column 1
+    \draw[whiteout] (LL) rectangle ++(1.6in,{{ "%.2f" | format(whiteout_height) }}in);
+{%- elif nrows < 50 %}
+    % white out columns 3-4
+    \draw[whiteout] ([xshift=3.4in]LL) rectangle (UR);
+    % white out rows {{ nrows + 1 }}--50 in column 2
+    \draw[whiteout] ([xshift=1.75in]LL) rectangle ++(1.75in,{{ "%.2f" | format(whiteout_height) }}in);
+{%- elif nrows == 50 %}
+    % white out columns 3-4
+    \draw[whiteout] ([xshift=3.4in]LL) rectangle (UR);
+{%- else %}
+    % More than 50 rows: nothing whited out; consider adjusting by hand.
+{%- endif %}
+{%- raw %}
+    \node[anchor=north west]
         at (3.25in,-3in)
-        {\uppercase{Put your name\\on this page too}};
+        {\begin{minipage}{0.5\textwidth}
+            \noindent{\textbf{\uppercase{Bubble Sheet Instructions}}}
+            \begin{instructions}
+            \begin{itemize}
+                \item \textbf{\color{Magenta}Write your Name and NetID at the top of this bubble sheet.}
+                \item Fill in your answers completely. Pencil is recommended.
+                \item Erase your mistakes completely.
+                \item The number of questions shown is the number that you should answer.
+            \end{itemize}
+            \end{instructions}
+        \end{minipage}};
+    \tikzset{
+        bubble sheet fill in/.style={
+            draw=none,
+            font={\bfseries\sffamily\Large},
+            DeepViolet
+        }
+    }
+    \node[bubble sheet fill in,anchor=south west]
+        at (3.6in,-0.45in) {
+{%- endraw %}
+            {{ cookiecutter.short_course_name }}
+{%- raw %}
+        };
+    \node[bubble sheet fill in,anchor=south west]
+        at (0.5in,-1in) {
+{%- endraw %}
+            {{ cookiecutter.get('section_number', '') }}
+{%- raw %}
+        };
+    \node[bubble sheet fill in,
+        anchor=south west]
+        at (0.5in,-1.5in) {
+            \makeatletter\@date\makeatother
+        };
 \end{tikzpicture}
+\examcleardoublepage
 \fi
 {%- endraw -%}
 {%- endif -%}
@@ -365,183 +447,138 @@ FT \(\Box\)
 {%- set num_cata = cookiecutter.num_cata | int -%}
 {%- if (num_cata > 0) -%}
 \begin{EnvFullwidth}
-    \section*{Check All That Apply}
-    
+    \section*{Check All That Apply Groups}
     \begin{instructions}%
-        In the next \numstrqinrange{cata} questions, more than one option \textbf{may} be correct.
-        You must select all correct options and none of the incorrect options to
-        earn full credit.
-    \end{instructions}    
+        In each group below, more than one option \textbf{may} be correct.
+        Each option is its own question on the bubble sheet:
+        fill in \textbf{A} (Yes) if the option should be chosen, and \textbf{B} (No) otherwise.
+        Each option is worth 1 point, so each group is worth 5 points.
+    \end{instructions}
 \end{EnvFullwidth}
 
+    \begingroup
     \begingradingrange{cata}
-{% for i in range(0,num_cata) %}    
-    \begin{question}[{{ cookiecutter.points_per_cata }}]
-        Stem
-        \begin{choices}
-            \CorrectChoice{}
-            \CorrectChoice{}
-            \choice{}
-            \choice{}
-            \choice{}
-        \end{choices}
-    \end{question}
+    \makeatletter\let\point@block\relax\makeatother
+    \NewList{cataoptions}
+    \newcommand{\Yes}{\hfill\mbox{\begin{oneparchoices}[norandomize]\CorrectChoice{Yes}\choice{No}\end{oneparchoices}}}
+    \newcommand{\No}{\hfill\mbox{\begin{oneparchoices}[norandomize]\choice{Yes}\CorrectChoice{No}\end{oneparchoices}}}
+{% for i in range(1,num_cata+1) %}
+    \begingradingrange{{ ("msq-" ~ i) | embrace }}
+    \begin{EnvUplevel}
+        \firstqinrange{{ ("msq-" ~ i) | embrace }}--\lastqinrange{{ ("msq-" ~ i) | embrace }}.
+        Stem: which of the following \dots?
+    \end{EnvUplevel}
+    \SetList{cataoptions}{
+      {Option}{\Yes},
+      {Option}{\Yes},
+      {Option}{\No},
+      {Option}{\No},
+      {Option}{\No}
+    }
+    \ForEachRandomItem{cataoptions}{Option}{
+        \ReadFieldItem{\Option}{0}{Stem}%
+        \ReadFieldItem{\Option}{1}{Answer}
+        \begin{question}[\mspoints]\Stem\Answer\end{question}
+    }
+    \endgradingrange{{ ("msq-" ~ i) | embrace }}
+    \medskip
 {% endfor %}
     \endgradingrange{cata}
+    \endgroup
     \examcleardoublepage%
 {% endif %}
 
 {%- set num_tf = cookiecutter.num_tf | int -%}
 {%- if (num_tf > 0) -%}
+    \begingradingrange{tfj}
+    \begingroup
+    \makeatletter\let\point@block\relax\makeatother
+
+\section*{True/False with Reasons}
 \begin{EnvFullwidth}
-    \section*{True/False}
-    
-    \begin{instructions}%
-        In the next \numstrqinrange{tfj} questions, indicate if the statement is true (T) or false (F).
-        If the statement is true, give a short justification.
-        If the statement is false, provide a counterexample or explain why.
-    \end{instructions}    
+\begin{instructions}
+    Decide if the statement is true or false, and give a reason.
+    Each statement on the exam counts for two questions on the bubble sheet.
+    \begin{itemize}
+        \item For the first, select \textbf{A} if the statement is true and \textbf{B} if it is false.
+          This question is worth 1 point.
+        \item For the second, select a reason.
+        \begin{itemize}
+            \item Select \textbf{A} if the statement is true by \textbf{definition}
+            \item Select \textbf{B} if the statement has been or can be \textbf{proven} 
+            \item Select \textbf{C} if the statement is \textbf{vacuously} true
+            \item Select \textbf{D} if the statement is false, because it is only \textbf{sometimes} satisfied
+            \item Select \textbf{E} if the statement is false, because it is \textbf{never} satisfied
+        \end{itemize}
+        This question is worth 2 points.
+    \end{itemize}
+\end{instructions}
 \end{EnvFullwidth}
 
-    \begingradingrange{tfj}
-{% for i in range(0,num_tf) %}    
-    \begin{question}[{{ cookiecutter.points_per_tf }}]
-        Statement
-        \fillin
-    \end{question}
+    \NewList{tfjqs}
+{% for i in range(1,num_tf+1) %}
+    \InsertLastItem{tfjqs}{{ bgroup }}%
+        \begingradingrange{{ ("tfj-" ~ i) | embrace }}
+        \begin{EnvUplevel}
+            \firstqinrange{{ ("tfj-" ~ i) | embrace }}--\lastqinrange{{ ("tfj-" ~ i) | embrace }}.
+            Statement
+        \end{EnvUplevel}
+        \begin{question}[\tfpoints] Truth value
+            \begin{oneparchoices}[norandomize]
+                \CorrectChoice{True}
+                \choice{False}
+            \end{oneparchoices}
+        \end{question}
+        \begin{question}[\tfrpoints] Reason
+            \begin{oneparchoices}[norandomize]
+                \CorrectChoice{Definition}
+                \choice{Proven}
+                \choice{Vacuous}
+                \choice{Sometimes}
+                \choice{Never}
+            \end{oneparchoices}
+            \begin{solution}
+                Reason
+            \end{solution}
+        \end{question}
+        \endgradingrange{{ ("tfj-" ~ i) | embrace }}
+    }
 {% endfor %}
+    \ForEachRandomItem{tfjqs}{Question}{
+        \Question
+        \medskip
+    }
+    \endgroup
     \endgradingrange{tfj}
     \examcleardoublepage%
 {% endif %}
-{%- raw -%}
-
-    \begingradingrange{fr}%
+{%- raw %}
+\begingradingrange{fr}%
     \fullwidth{\section*{Free Response}
 
     \begin{instructions}%
         The remaining questions are free response questions or proofs.  Put your
         answers in the blanks (where provided) and your work/explanations in the
         space below each problem or problem part.
-
-        For full credit, make sure to follow instructions as given.
-    
-        % https://www.woostercolts.com/cms/lib/NV02000980/Centricity/Shared/pdf/ib/ibmyp/ibmyp-command-terms.pdf
-        \begin{itemize}
-            \item \textbf{State} means to give a specific name, value or other brief answer.
-            \item \textbf{Explain} means to give a detailed account including reasons or causes.
-            \item \textbf{Prove} means to use a sequence of logical steps to formally demonstrate the required result.
-            \item Write complete sentences in English. Do not use the three-dots notation (\(\therefore\) or \(\because\)).
-        \end{itemize}
+        Justify your steps with statements proven in the textbook or notes.
+        Write complete sentences in English. Do not use the three-dots notation (\(\therefore\) or \(\because\)).
+        Command terms such as \textbf{explain} and \textbf{prove} are defined in the glossary
+        on page~\pageref{command-verbs-glossary}.
     \end{instructions}}
-
-    \question\label{frq-surjinj}
-    Suppose that $A$ and $B$ are sets, and $f \from A \to B$ and $g \from B \to A$ 
-    are functions such that $g \comp f = \IdentityFunction[A]$.
-    \begin{parts}
-        \part[6]\label{frq-composition-inj-surj}
-            Prove that $f$ is injective and $g$ is surjective.
-
-            \begin{solution}
-                Suppose there exist $a_1, a_2 \in A$ such that $f(a_1) = f(a_2)$.
-                Then $g(f(a_1)) = g(f(a_2))$.
-                But $(g \comp f)(a_1) = \IdentityFunction[A](a_1) = a_1$, 
-                and $(g \comp f)(a_2) = \IdentityFunction[A](a_1) = a_2$, 
-                so $a_1 = a_2$.
-                Therefore, $f$ is injective.
-
-                Now suppose $a \in A$; we want to find $b \in B$ such that $g(b) =a$.
-                Let $b = f(a)$. Then
-                \[
-                    g(b) =g(f(a)) = \IdentityFunction[A](a) = a
-                \]
-                which is what we want.
-
-            \end{solution}
-
-        \vspace{\stretch{2}}
-
-
-        \part[4] Give an example of the above scenario in which neither $f$ nor $g$ is a bijection.
-
-        \begin{solution}
-            Answers may vary. Here is one:
-            Let $A = \set{1}$, $B=\set{1,2}$, $f=\set{(1,1)}$, and $g = \set{(1,1),(2,1)}$.
-            Then $f \from A \to B$ is not surjective, and $g \from B \to A$ is not injective.
-            But $g \comp f = \set{(1,1)} = \IdentityFunction[A]$.
+{% endraw %}
+{%- set num_frq = cookiecutter.num_frq | int -%}
+{% for i in range(0,num_frq) %}
+    \begin{question}[10]
+        Stem. \Gls{prove} \dots
+        \begin{solution}[\stretch{1}]
+            Solution
         \end{solution}
-        \vspace{\stretch{1}}
-    \end{parts}
-
-
+    \end{question}
     \examcleardoublepage
-    \question\label{frq-kq}
-        We will prove this claim: \emph{for all positive integers \(n\) there exist 
-        unique $k,q \in \N$ such that $q$ is odd and $n=2^k q$.}
+{% endfor %}
+\endgradingrange{fr}
+{%- raw %}
 
-        \begin{parts}
-
-            \part[4]
-            Fill in the table to check a few cases:
-            \begin{center}
-                \renewcommand{\arraystretch}{2}%
-                \begin{tabular}{|c|c|c|}\hline
-                    $n$ & $k$ & $q$ \\\hline
-                    20 & \fillin[2] & \fillin[5]\\
-                    21 & \fillin[0] & \fillin[21]\\
-                    22 & \fillin[2] & \fillin[11]\\
-                    23 & \fillin[1] & \fillin[23]\\\hline
-                \end{tabular}    
-            \end{center}
-        
-            \part[8]
-                Prove \emph{by strong induction} the “existence” part of the statement.
-                Hint: every integer is either even or odd.
-
-                \begin{solution}
-                    We use strong induction. The base case $n=1$ is satisfied by
-                    $k=0$ and $q=1$.
-
-                    Now suppose there exists $n$ such that for all integers $m$ 
-                    satisfying $1 \leq m < n$, there exist $k$ and $q$ as above.
-                    Consider $n$.
-
-                    \begin{itemize}
-                        \item If $n$ is odd, $n=2^k q$ is satisfied by $k=0$ and $q=n$.
-                        \item If $n$ is even, then there exists $m$ such that $n = 2m$.
-                            Since $1 \leq m < n$, there exist $k'$ and $q'$ such that
-                            $m=2^{k'}q'$. Then $n = 2^{k'+1}q'$, so we can set $k = k'+1$
-                            and $q=q'$ to satisfy the claim for $n$.
-                    \end{itemize}
-
-                    Therefore by strong induction, all positive integers $n$ satisfy the claim.
-                \end{solution}
-                \vspace{\stretch{1}}
-
-            \newpage
-            \part[4]
-                Prove \emph{by contradiction} the “uniqueness” part of the claim:
-                for all $n$ the pair $(k,q)$ is unique.
-
-                Hint: no integer is \emph{both} even and odd.
-
-                \begin{solution}
-                    Suppose there exist $(k,q)$ and $(k',q')$ such that $n = 2^k
-                    q = 2^{k'}q'$. Either $k \leq k'$ or vice versa; we will
-                    assume the former. We have
-                    \[
-                        2^{k}q = 2^{k'}q' 
-                        \implies  2^k(2^{k'-k}q) = q'
-                    \]
-                    The left-hand side is even, while the right-hand side is odd.
-                    This is a contradiction.
-                \end{solution}
-                \vspace{\stretch{1}}
-        \end{parts}
-    
-        \examcleardoublepage
-
-
-    % Delete/disable the line below to end the exam
     \end{questions}
 \end{document}
 %</questions>

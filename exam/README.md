@@ -29,6 +29,30 @@ This will generate an `l3build` module.
 
 * `use_nyu_fonts` [y/n]: Use the NYU fonts NYU Perstare and Frank Ruhl Libre. User is in charge of downloading and installing these fonts.
 
+* `use_barcode`: Pass the `barcode` option to the `nyuexam3` class, which
+  puts an Aztec code of the job name in the top right corner of the cover.
+
+* `section_number`: Printed in the Section field of the bubble sheet.
+
+* `use_bubble_sheet`: Include a Gradescope bubble sheet page. Its Name/ID
+  fields are highlighted, the Other field is filled with
+  `short_course_name`, and unused bubble rows are whited out. The number of
+  rows is `num_mcq + 5*num_cata + 2*num_tf`; the whiteout heights are
+  computed from that (calibrated on Fall 2026 Discrete Midterm I), but check
+  the rendered page.
+
+* `num_mcq`, `points_per_mcq`: Number and point value of multiple choice
+  questions.
+
+* `num_cata`: Number of check-all-that-apply *groups*. Each group is five
+  Yes/No questions worth 1 point each, so Gradescope can give partial credit.
+
+* `num_tf`: Number of true/false statements. Each is two questions: a truth
+  value (1 point) and a reason (Definition/Proven/Vacuous/Sometimes/Never,
+  2 points).
+
+* `num_frq`: Number of free response stubs.
+
 * `has_versions`: Set this to `y` if you want several versions of the same exam.
 
 * `versions_csv`: A comma-separated string list of the version names. They will
@@ -69,6 +93,16 @@ multiple versions, each will get its own seed.
   wrapped in `\relax` followed by one guarded line per version; when empty,
   `\date` is just the plain `exam_date`.
   Example: `"6A:11:00 a.m.,16A:3:30 p.m."`
+
+## Support files
+
+* `command-verbs.tex`: a glossary of IB command terms (explain, prove, …).
+  Use `\gls{prove}` / `\Gls{prove}` in questions; the glossary page after
+  the cover lists only the terms used.
+
+* `aux_to_csv.lua`: when building solutions with LuaLaTeX, writes
+  `\jobname.csv` with each question's correct choice and point value, for
+  uploading an answer key to Gradescope.
 
 ## Testing
 
