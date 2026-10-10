@@ -11,7 +11,7 @@
             "description": "A quiz derived from the exam class"
         },
         "exam": {
-            "path" : "./nyuexam",
+            "path" : "./exam",
             "title" : "Exam",
             "description" : "An exam"
         }
