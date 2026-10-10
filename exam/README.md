@@ -41,6 +41,11 @@ This will generate an `l3build` module.
   computed from that (calibrated on Fall 2026 Discrete Midterm I), but check
   the rendered page.
 
+* `use_formula_sheet`: Include `support/formula_sheet_nyu.pdf` (algebra,
+  geometry, and trigonometry reference pages) at the end of the question
+  versions. It follows an `\examcleardoublepage`, so it is the front and back
+  of the last sheet of paper. It is left out of the solutions.
+
 * `num_mcq`, `points_per_mcq`: Number and point value of multiple choice
   questions.
 
@@ -99,6 +104,11 @@ multiple versions, each will get its own seed.
 * `command-verbs.tex`: a glossary of IB command terms (explain, prove, …).
   Use `\gls{prove}` / `\Gls{prove}` in questions; the glossary page after
   the cover lists only the terms used.
+
+* `formula_sheet_nyu.pdf`: two reference pages of algebra, geometry, and
+  trigonometry formulas in NYU Perstare and the NYU color palette, included
+  with `use_formula_sheet`. To change it, edit `formula_sheet_nyu.tex` and
+  compile it with `lualatex`.
 
 * `aux_to_csv.lua`: when building solutions with LuaLaTeX, writes
   `\jobname.csv` with each question's correct choice and point value, for

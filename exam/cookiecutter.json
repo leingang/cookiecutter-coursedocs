@@ -11,6 +11,7 @@
     "section_number" : "",
     "use_bubble_sheet": true,
     "use_barcode": true,
+    "use_formula_sheet": true,
     "num_mcq" : 5,
     "points_per_mcq" : 3,
     "num_cata" : 3,

@@ -1,0 +1,409 @@
+%!TEX TS-program = lualatex
+% Source for formula_sheet_nyu.pdf: reference pages for algebra, geometry, and
+% trigonometry, set in the NYU typefaces and color palette.
+% The content follows the reference pages of Stewart, Essential Calculus:
+% Early Transcendentals, 2nd ed.
+%
+% Compile with lualatex (twice is not necessary).
+\documentclass[8pt]{extarticle}
+% Same page size as the original reference pages
+\usepackage[paperwidth=498.257bp,paperheight=634.726bp,
+    hmargin=0.48in,top=0.4in,bottom=0.3in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage[font-group=proprietary]{nyu22fonts}
+\usepackage{xcolor-nyu22}
+% Function names such as sin and cos in NYU Perstare too
+\setmathrm{NYU Perstare}[UprightFont=* Regular,BoldFont=* Medium]
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{calc,angles,quotes}
+
+\renewcommand{\familydefault}{\sfdefault}
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\raggedbottom
+\newlength{\rowskip}
+\setlength{\rowskip}{3.5pt}
+\newlength{\topicskip}
+\setlength{\topicskip}{9pt}
+
+\colorlet{sheetaccent}{NyuViolet}
+\colorlet{sheetfill}{LightViolet2}
+\colorlet{sheetshade}{LightViolet1}
+
+% Title of a page or column, with a rule below
+\newcommand{\sheettitle}[1]{%
+    {\centering\fontseries{b}\selectfont\color{sheetaccent}%
+     \addfontfeature{LetterSpace=30}\MakeUppercase{#1}\par}%
+    \vspace{2pt}\hrule height 0.6pt\vspace{7pt}}
+% Heading of a topic
+\newcommand{\topic}[1]{%
+    \par\addvspace{\topicskip}%
+    {\fontseries{b}\selectfont\color{sheetaccent}%
+     \addfontfeature{LetterSpace=6}\MakeUppercase{#1}\par}%
+    \nopagebreak\vspace{4pt}}
+% One formula on a line
+\newcommand{\one}[1]{\(\displaystyle #1\)\par\vspace{\rowskip}}
+% Two formulas on a line; the optional argument is the width of the first
+\newcommand{\two}[3][0.47]{%
+    \makebox[#1\linewidth][l]{\(\displaystyle #2\)}\(\displaystyle #3\)\par\vspace{\rowskip}}
+% A centered formula
+\newcommand{\centered}[1]{{\centering\(\displaystyle #1\)\par}\vspace{\rowskip}}
+
+\tikzset{
+    every picture/.style={line cap=round,line join=round,font=\footnotesize},
+    accent/.style={draw=sheetaccent,line width=0.7pt},
+    filled/.style={accent,fill=sheetfill},
+    thin line/.style={draw=black,line width=0.4pt},
+    helper/.style={draw=black,line width=0.4pt,dashed},
+    dimension/.style={draw=black,line width=0.4pt,|<->|,>=stealth},
+}
+
+% A graph of a trigonometric function on [0, 2pi].
+% #1: label, #2: position of the label, #3: plot commands
+\newcommand{\triggraph}[3]{%
+    \begin{tikzpicture}[x=0.235cm,y=0.45cm,font=\scriptsize]
+        \draw[thin line,->,>=stealth] (-0.6,0) -- (7.4,0) node[below left,inner sep=1.5pt] {\(x\)};
+        \draw[thin line,->,>=stealth] (0,-2.3) -- (0,2.6) node[left,inner sep=2pt] {\(y\)};
+        \draw[thin line] (-0.15,1) -- (0.15,1) node[left=1.5pt,inner sep=0.5pt] {\(1\)};
+        \draw[thin line] (-0.15,-1) -- (0.15,-1) node[left=1.5pt,inner sep=0.5pt] {\(-1\)};
+        \draw[thin line] (pi,-0.12) -- (pi,0.12);
+        \draw[thin line] (2*pi,-0.12) -- (2*pi,0.12);
+        \begin{scope}
+            \clip (-0.6,-2.2) rectangle (7.2,2.2);
+            #3
+        \end{scope}
+        \node[fill=white,inner sep=1pt] at (pi,-0.65) {\(\pi\)};
+        \node[fill=white,inner sep=1pt] at (2*pi,-0.65) {\(2\pi\)};
+        \node[anchor=west,inner sep=1pt,fill=white] at #2 {#1};
+    \end{tikzpicture}}
+\newcommand{\asymptote}[1]{\draw[helper] ({#1},-2.2) -- ({#1},2.2);}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Page 1: Algebra and Geometry
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{minipage}[t]{0.48\textwidth}\raggedright
+\sheettitle{Algebra}
+
+\topic{Arithmetic Operations}
+\two{a(b+c) = ab + ac}{\frac{a}{b} + \frac{c}{d} = \frac{ad+bc}{bd}}
+\two{\frac{a+c}{b} = \frac{a}{b} + \frac{c}{b}}
+    {\frac{\;\dfrac{a}{b}\;}{\dfrac{c}{d}} = \frac{a}{b}\times\frac{d}{c} = \frac{ad}{bc}}
+
+\topic{Exponents and Radicals}
+\two{x^m x^n = x^{m+n}}{\frac{x^m}{x^n} = x^{m-n}}
+\two{(x^m)^n = x^{mn}}{x^{-n} = \frac{1}{x^n}}
+\two{(xy)^n = x^n y^n}{\left(\frac{x}{y}\right)^{\!n} = \frac{x^n}{y^n}}
+\two{x^{1/n} = \sqrt[n]{x}}{x^{m/n} = \sqrt[n]{x^m} = \left(\sqrt[n]{x}\right)^m}
+\two{\sqrt[n]{xy} = \sqrt[n]{x}\,\sqrt[n]{y}}{\sqrt[n]{\frac{x}{y}} = \frac{\sqrt[n]{x}}{\sqrt[n]{y}}}
+
+\topic{Factoring Special Polynomials}
+\one{x^2 - y^2 = (x+y)(x-y)}
+\one{x^3 + y^3 = (x+y)(x^2 - xy + y^2)}
+\one{x^3 - y^3 = (x-y)(x^2 + xy + y^2)}
+
+\topic{Binomial Theorem}
+\two[0.53]{(x+y)^2 = x^2 + 2xy + y^2}{(x-y)^2 = x^2 - 2xy + y^2}
+\one{(x+y)^3 = x^3 + 3x^2y + 3xy^2 + y^3}
+\one{(x-y)^3 = x^3 - 3x^2y + 3xy^2 - y^3}
+\one{(x+y)^n = x^n + nx^{n-1}y + \frac{n(n-1)}{2}x^{n-2}y^2}
+\one{\hphantom{(x+y)^n = x^n} + \dots + \binom{n}{k}x^{n-k}y^k + \dots + nxy^{n-1} + y^n}
+\one{\text{where } \binom{n}{k} = \frac{n(n-1)\cdots(n-k+1)}{1\cdot 2\cdot 3\cdot\,\cdots\,\cdot k}}
+
+\topic{Quadratic Formula}
+\one{\text{If } ax^2 + bx + c = 0, \text{ then } x = \frac{-b \pm \sqrt{b^2-4ac}}{2a}.}
+
+\topic{Inequalities and Absolute Value}
+If \(a<b\) and \(b<c\), then \(a<c\).\par\vspace{\rowskip}
+If \(a<b\), then \(a+c<b+c\).\par\vspace{\rowskip}
+If \(a<b\) and \(c>0\), then \(ca<cb\).\par\vspace{\rowskip}
+If \(a<b\) and \(c<0\), then \(ca>cb\).\par\vspace{\rowskip}
+If \(a>0\), then\par\vspace{3pt}
+\hspace*{0.2\linewidth}%
+\begin{tabular}{@{}l@{\quad}l@{\quad}l@{}}
+    \(|x| = a\) & means & \(x = a\) \ or \ \(x = -a\) \\[3pt]
+    \(|x| < a\) & means & \(-a < x < a\) \\[3pt]
+    \(|x| > a\) & means & \(x > a\) \ or \ \(x < -a\)
+\end{tabular}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.48\textwidth}\raggedright
+\sheettitle{Geometry}
+
+\topic{Geometric Formulas}
+Formulas for area \(A\), circumference \(C\), and volume \(V\):\par\vspace{6pt}
+\begin{tabular}[t]{@{}p{0.31\linewidth}@{}p{0.27\linewidth}@{}p{0.42\linewidth}@{}}
+    Triangle & Circle & Sector of Circle \\[2pt]
+    \(A = \tfrac12 bh\) & \(A = \pi r^2\) & \(A = \tfrac12 r^2\theta\) \\[2pt]
+    \(\hphantom{A} = \tfrac12 ab\sin\theta\) & \(C = 2\pi r\) & \(s = r\theta\) (\(\theta\) in radians) \\[6pt]
+    % triangle
+    \begin{tikzpicture}[baseline=(current bounding box.south),scale=0.62]
+        \coordinate (A) at (0,0);
+        \coordinate (B) at (3.6,0);
+        \coordinate (C) at (2.4,1.25);
+        \draw[filled] (A) -- (B) -- (C) -- cycle;
+        \draw[helper] (C) -- (2.4,0);
+        \draw[thin line] (2.4,0.2) -| (2.6,0);
+        \pic[draw=black,line width=0.4pt,angle radius=0.45cm,"\(\theta\)",angle eccentricity=1.5] {angle=B--A--C};
+        \node[above left=-1pt] at ($(A)!0.5!(C)$) {\(a\)};
+        \node[below] at ($(A)!0.5!(B)$) {\(b\)};
+        \node[left=-1pt] at (2.4,0.65) {\(h\)};
+    \end{tikzpicture}
+    &
+    % circle
+    \begin{tikzpicture}[baseline=(current bounding box.south),scale=0.62]
+        \draw[filled] (0,0) circle (1.25);
+        \fill (0,0) circle (1.2pt);
+        \draw[thin line] (0,0) -- node[above=-1pt] {\(r\)} (1.25,0);
+    \end{tikzpicture}
+    &
+    % sector
+    \begin{tikzpicture}[baseline=(current bounding box.south),scale=0.62]
+        \coordinate (O) at (0,0);
+        \coordinate (P) at (2.4,0);
+        \coordinate (Q) at (40:2.4);
+        \draw[filled] (O) -- (P) arc (0:40:2.4) -- cycle;
+        \pic[draw=black,line width=0.4pt,angle radius=0.45cm,"\(\theta\)",angle eccentricity=1.5] {angle=P--O--Q};
+        \node[below] at (1.2,0) {\(r\)};
+        \node[above left=-1pt] at (40:1.2) {\(r\)};
+        \node[right] at (20:2.4) {\(s\)};
+    \end{tikzpicture}
+    \\[10pt]
+    Sphere & Cylinder & Cone \\[2pt]
+    \(V = \tfrac43\pi r^3\) & \(V = \pi r^2 h\) & \(V = \tfrac13\pi r^2 h\) \\[2pt]
+    \(A = 4\pi r^2\) & & \\[6pt]
+    % sphere
+    \begin{tikzpicture}[baseline=(current bounding box.south),scale=0.62]
+        \shade[ball color=sheetshade!55!white] (0,0) circle (1.25);
+        \draw[accent] (0,0) circle (1.25);
+        \fill (0,0) circle (1.2pt);
+        \draw[thin line] (0,0) -- node[above=-1pt] {\(r\)} (1.25,0);
+    \end{tikzpicture}
+    &
+    % cylinder
+    \begin{tikzpicture}[baseline=(current bounding box.south),scale=0.62]
+        \draw[filled] (-1.1,2) -- (-1.1,0) arc (180:360:1.1 and 0.3) -- (1.1,2);
+        \draw[accent,dashed] (1.1,0) arc (0:180:1.1 and 0.3);
+        \draw[accent,fill=sheetshade!50] (0,2) ellipse (1.1 and 0.3);
+        \fill (0,2) circle (1.2pt);
+        \draw[thin line] (0,2) -- node[above=-2pt] {\(r\)} (1.1,2);
+        \draw[dimension] (1.6,0) -- node[right=-1pt] {\(h\)} (1.6,2);
+    \end{tikzpicture}
+    &
+    % cone
+    \begin{tikzpicture}[baseline=(current bounding box.south),scale=0.62]
+        \draw[filled] (-1.3,0) arc (180:360:1.3 and 0.35) -- (0,2.2) -- cycle;
+        \draw[accent,dashed] (1.3,0) arc (0:180:1.3 and 0.35);
+        \fill (0,0) circle (1.2pt);
+        \draw[thin line] (0,0) -- node[above=-2pt] {\(r\)} (1.3,0);
+        \draw[dimension] (1.8,0) -- node[right=-1pt] {\(h\)} (1.8,2.2);
+    \end{tikzpicture}
+\end{tabular}
+
+\topic{Distance and Midpoint Formulas}
+Distance between \(P_1(x_1,y_1)\) and \(P_2(x_2,y_2)\):\par\vspace{4pt}
+\centered{d = \sqrt{(x_2-x_1)^2 + (y_2-y_1)^2}}
+\vspace{2pt}
+\one{\text{Midpoint of } \overline{P_1P_2}\colon\quad
+    \left(\frac{x_1+x_2}{2},\ \frac{y_1+y_2}{2}\right)}
+
+\topic{Lines}
+Slope of line through \(P_1(x_1,y_1)\) and \(P_2(x_2,y_2)\):\par\vspace{4pt}
+\centered{m = \frac{y_2-y_1}{x_2-x_1}}
+\vspace{2pt}
+Point-slope equation of line through \(P_1(x_1,y_1)\) with slope \(m\):\par\vspace{4pt}
+\centered{y - y_1 = m(x - x_1)}
+\vspace{2pt}
+Slope-intercept equation of line with slope \(m\) and \(y\)-intercept \(b\):\par\vspace{4pt}
+\centered{y = mx + b}
+
+\topic{Circles}
+Equation of the circle with center \((h,k)\) and radius \(r\):\par\vspace{4pt}
+\centered{(x-h)^2 + (y-k)^2 = r^2}
+\end{minipage}
+
+\clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Page 2: Trigonometry
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This page is less full, so space it out more
+\setlength{\rowskip}{6pt}
+\setlength{\topicskip}{14pt}
+\sheettitle{Trigonometry}
+\begin{minipage}[t]{0.48\textwidth}\raggedright
+\topic{Angle Measurement}
+\begin{minipage}[c]{0.58\linewidth}
+    \one{\pi \text{ radians} = 180^\circ}
+    \two[0.5]{1^\circ = \frac{\pi}{180}\text{ rad}}{1\text{ rad} = \frac{180^\circ}{\pi}}
+    \one{s = r\theta}
+    (\(\theta\) in radians)
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.38\linewidth}
+    \centering
+    \begin{tikzpicture}[scale=0.62]
+        \coordinate (O) at (0,0);
+        \coordinate (P) at (1.5,0);
+        \coordinate (Q) at (65:1.5);
+        \draw[accent] (O) circle (1.5);
+        \draw[accent] (P) -- (O) -- (Q);
+        \draw[accent,line width=1.4pt] (P) arc (0:65:1.5);
+        \pic[draw=black,line width=0.4pt,angle radius=0.2cm,"\(\theta\)",angle eccentricity=1.9] {angle=P--O--Q};
+        \node[below] at (0.75,0) {\(r\)};
+        \node[left=-1pt] at (65:0.9) {\(r\)};
+        \node[above right=-2pt] at (32:1.5) {\(s\)};
+    \end{tikzpicture}
+\end{minipage}
+
+\topic{Right Angle Trigonometry}
+\begin{minipage}[c]{0.52\linewidth}
+    \two[0.5]{\sin\theta = \frac{\text{opp}}{\text{hyp}}}{\csc\theta = \frac{\text{hyp}}{\text{opp}}}
+    \two[0.5]{\cos\theta = \frac{\text{adj}}{\text{hyp}}}{\sec\theta = \frac{\text{hyp}}{\text{adj}}}
+    \two[0.5]{\tan\theta = \frac{\text{opp}}{\text{adj}}}{\cot\theta = \frac{\text{adj}}{\text{opp}}}
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.44\linewidth}
+    \centering
+    \begin{tikzpicture}[scale=0.62]
+        \coordinate (A) at (0,0);
+        \coordinate (B) at (3.2,0);
+        \coordinate (C) at (3.2,1.7);
+        \draw[accent] (A) -- (B) -- (C) -- cycle;
+        \draw[thin line] (3.0,0) |- (3.2,0.2);
+        \pic[draw=black,line width=0.4pt,angle radius=0.45cm,"\(\theta\)",angle eccentricity=1.45] {angle=B--A--C};
+        \node[above left=-1pt] at ($(A)!0.5!(C)$) {hyp};
+        \node[right] at ($(B)!0.5!(C)$) {opp};
+        \node[below] at ($(A)!0.5!(B)$) {adj};
+    \end{tikzpicture}
+\end{minipage}
+
+\topic{Trigonometric Functions}
+\begin{minipage}[c]{0.52\linewidth}
+    \two[0.5]{\sin\theta = \frac{y}{r}}{\csc\theta = \frac{r}{y}}
+    \two[0.5]{\cos\theta = \frac{x}{r}}{\sec\theta = \frac{r}{x}}
+    \two[0.5]{\tan\theta = \frac{y}{x}}{\cot\theta = \frac{x}{y}}
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.44\linewidth}
+    \centering
+    \begin{tikzpicture}[scale=0.62]
+        \coordinate (O) at (0,0);
+        \coordinate (X) at (1,0);
+        \coordinate (P) at (2.2,1.75);
+        \draw[thin line,->,>=stealth] (-0.3,0) -- (3.6,0) node[below] {\(x\)};
+        \draw[thin line,->,>=stealth] (0,-0.3) -- (0,2.7) node[left] {\(y\)};
+        \draw[accent] (O) -- ($(O)!1.3!(P)$);
+        \draw[helper] (P) -- (2.2,0);
+        \draw[thin line] (2.0,0) |- (2.2,0.2);
+        \fill (P) circle (1.4pt);
+        \pic[draw=black,line width=0.4pt,angle radius=0.4cm,"\(\theta\)",angle eccentricity=1.45] {angle=X--O--P};
+        \node[above left=-1pt] at ($(O)!0.55!(P)$) {\(r\)};
+        \node[right] at (P) {\((x,y)\)};
+    \end{tikzpicture}
+\end{minipage}
+
+\topic{Graphs of the Trigonometric Functions}
+\triggraph{\(y=\sin x\)}{(0.5,2.6)}{
+    \draw[accent] plot[domain=0:2*pi,samples=60,smooth] (\x,{sin(deg(\x))});}%
+\hfill
+\triggraph{\(y=\cos x\)}{(0.5,2.6)}{
+    \draw[accent] plot[domain=0:2*pi,samples=60,smooth] (\x,{cos(deg(\x))});}%
+\hfill
+\triggraph{\(y=\tan x\)}{(0.5,2.6)}{
+    \asymptote{pi/2}\asymptote{3*pi/2}
+    \draw[accent] plot[domain=0:1.2,samples=30,smooth] (\x,{tan(deg(\x))});
+    \draw[accent] plot[domain=1.95:4.33,samples=40,smooth] (\x,{tan(deg(\x))});
+    \draw[accent] plot[domain=5.09:2*pi,samples=30,smooth] (\x,{tan(deg(\x))});}
+
+\vspace{8pt}
+\triggraph{\(y=\csc x\)}{(0.5,2.6)}{
+    \asymptote{pi}\asymptote{2*pi}
+    \draw[accent] plot[domain=0.4:2.74,samples=40,smooth] (\x,{1/sin(deg(\x))});
+    \draw[accent] plot[domain=3.54:5.88,samples=40,smooth] (\x,{1/sin(deg(\x))});}%
+\hfill
+\triggraph{\(y=\sec x\)}{(0.5,2.6)}{
+    \asymptote{pi/2}\asymptote{3*pi/2}
+    \draw[accent] plot[domain=0:1.17,samples=30,smooth] (\x,{1/cos(deg(\x))});
+    \draw[accent] plot[domain=1.97:4.31,samples=40,smooth] (\x,{1/cos(deg(\x))});
+    \draw[accent] plot[domain=5.11:2*pi,samples=30,smooth] (\x,{1/cos(deg(\x))});}%
+\hfill
+\triggraph{\(y=\cot x\)}{(0.5,2.6)}{
+    \asymptote{pi}\asymptote{2*pi}
+    \draw[accent] plot[domain=0.38:2.76,samples=40,smooth] (\x,{cos(deg(\x))/sin(deg(\x))});
+    \draw[accent] plot[domain=3.52:5.9,samples=40,smooth] (\x,{cos(deg(\x))/sin(deg(\x))});}
+
+\topic{Trigonometric Functions of Important Angles}
+\renewcommand{\arraystretch}{1.35}%
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}ccccc@{}}
+    \toprule
+    \(\theta\) & radians & \(\sin\theta\) & \(\cos\theta\) & \(\tan\theta\) \\
+    \midrule
+    \(0^\circ\)  & \(0\)     & \(0\)          & \(1\)          & \(0\) \\
+    \(30^\circ\) & \(\pi/6\) & \(1/2\)        & \(\sqrt3/2\)   & \(\sqrt3/3\) \\
+    \(45^\circ\) & \(\pi/4\) & \(\sqrt2/2\)   & \(\sqrt2/2\)   & \(1\) \\
+    \(60^\circ\) & \(\pi/3\) & \(\sqrt3/2\)   & \(1/2\)        & \(\sqrt3\) \\
+    \(90^\circ\) & \(\pi/2\) & \(1\)          & \(0\)          & --- \\
+    \bottomrule
+\end{tabular*}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{0.48\textwidth}\raggedright
+\topic{Fundamental Identities}
+\two[0.55]{\csc\theta = \frac{1}{\sin\theta}}{\sec\theta = \frac{1}{\cos\theta}}
+\two[0.55]{\tan\theta = \frac{\sin\theta}{\cos\theta}}{\cot\theta = \frac{\cos\theta}{\sin\theta}}
+\two[0.55]{\cot\theta = \frac{1}{\tan\theta}}{\sin^2\theta + \cos^2\theta = 1}
+\vspace{3pt}
+\two[0.55]{1 + \tan^2\theta = \sec^2\theta}{1 + \cot^2\theta = \csc^2\theta}
+\vspace{3pt}
+\two[0.55]{\sin(-\theta) = -\sin\theta}{\cos(-\theta) = \cos\theta}
+\two[0.55]{\tan(-\theta) = -\tan\theta}{\sin\left(\frac{\pi}{2}-\theta\right) = \cos\theta}
+\two[0.55]{\cos\left(\frac{\pi}{2}-\theta\right) = \sin\theta}{\tan\left(\frac{\pi}{2}-\theta\right) = \cot\theta}
+
+\vspace{4pt}
+\begin{minipage}[c]{0.58\linewidth}
+    \topic{The Law of Sines}
+    \one{\frac{\sin A}{a} = \frac{\sin B}{b} = \frac{\sin C}{c}}
+
+    \topic{The Law of Cosines}
+    \one{a^2 = b^2 + c^2 - 2bc\cos A}
+    \one{b^2 = a^2 + c^2 - 2ac\cos B}
+    \one{c^2 = a^2 + b^2 - 2ab\cos C}
+\end{minipage}%
+\hfill
+\begin{minipage}[c]{0.38\linewidth}
+    \centering
+    \begin{tikzpicture}[scale=0.62]
+        \coordinate (A) at (0,0);
+        \coordinate (B) at (1.9,4.4);
+        \coordinate (C) at (2.9,2.9);
+        \draw[accent] (A) -- (B) -- (C) -- cycle;
+        \node[below left=-2pt] at (A) {\(A\)};
+        \node[above=-1pt] at (B) {\(B\)};
+        \node[right=-1pt] at (C) {\(C\)};
+        \node[above right=-2pt] at ($(B)!0.5!(C)$) {\(a\)};
+        \node[below right=-2pt] at ($(A)!0.5!(C)$) {\(b\)};
+        \node[above left=-2pt] at ($(A)!0.5!(B)$) {\(c\)};
+    \end{tikzpicture}
+\end{minipage}
+
+\topic{Addition and Subtraction Formulas}
+\one{\sin(x+y) = \sin x\cos y + \cos x\sin y}
+\one{\sin(x-y) = \sin x\cos y - \cos x\sin y}
+\one{\cos(x+y) = \cos x\cos y - \sin x\sin y}
+\one{\cos(x-y) = \cos x\cos y + \sin x\sin y}
+\one{\tan(x+y) = \frac{\tan x + \tan y}{1 - \tan x\tan y}}
+\one{\tan(x-y) = \frac{\tan x - \tan y}{1 + \tan x\tan y}}
+
+\topic{Double-Angle Formulas}
+\one{\sin 2x = 2\sin x\cos x}
+\one{\cos 2x = \cos^2 x - \sin^2 x = 2\cos^2 x - 1 = 1 - 2\sin^2 x}
+\one{\tan 2x = \frac{2\tan x}{1 - \tan^2 x}}
+
+\topic{Half-Angle Formulas}
+\two[0.5]{\sin^2 x = \frac{1 - \cos 2x}{2}}{\cos^2 x = \frac{1 + \cos 2x}{2}}
+\end{minipage}
+
+\end{document}

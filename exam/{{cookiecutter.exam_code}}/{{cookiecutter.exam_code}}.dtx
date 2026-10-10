@@ -183,8 +183,10 @@
 \newcommand{\tfrpoints}{2}% reason for a true/false statement
 
 \usepackage{siunitx}% \qty command
-
-{%- endraw -%}
+{%- endraw %}
+{%- if cookiecutter.get('use_formula_sheet') %}
+\usepackage{pdfpages}% \includepdf, for the formula sheet
+{%- endif -%}
 {%- if cookiecutter.icons_package == 'marvosym' -%}
 {%- raw %}
 \let\Cross\relax
@@ -580,6 +582,18 @@ FT \(\Box\)
 {%- raw %}
 
     \end{questions}
+{%- endraw %}
+{%- if cookiecutter.get('use_formula_sheet') %}
+{%- raw %}
+% The formula sheet is the front and back of the last sheet of paper:
+% \examcleardoublepage puts us at the top of an odd page.
+\ifprintanswers\else
+    \examcleardoublepage
+    \includepdf[pages=-,noautoscale,scale=1.15]{formula_sheet_nyu}
+\fi
+{%- endraw %}
+{%- endif %}
+{%- raw %}
 \end{document}
 %</questions>
 {% endraw -%}
