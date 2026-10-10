@@ -130,7 +130,8 @@
 \setrandomizerseed{\randomseed}
 \pgfmathsetseed{\randomseed}
 {% endraw -%}
-{%- if cookiecutter.get('use_randomlist') -%}
+{#- The check-all-that-apply groups and true/false statements are shuffled with randomlist. -#}
+{%- if cookiecutter.get('use_randomlist') or (cookiecutter.num_cata | int) > 0 or (cookiecutter.num_tf | int) > 0 -%}
 \usepackage{randomlist}
 \RLsetrandomseed{\randomseed}
 \usepackage{versionlist}
@@ -182,6 +183,7 @@
 \newcommand{\tfpoints}{1}% truth value of a true/false statement
 \newcommand{\tfrpoints}{2}% reason for a true/false statement
 
+\usepackage{amssymb}% \Box, on the cover
 \usepackage{siunitx}% \qty command
 {%- endraw %}
 {%- if cookiecutter.get('use_formula_sheet') %}

@@ -58,6 +58,10 @@ This will generate an `l3build` module.
 
 * `num_frq`: Number of free response stubs.
 
+* `use_randomlist`: Load the `randomlist` package (and `versionlist`; see
+  below). It is loaded regardless when `num_cata` or `num_tf` is positive,
+  because those question groups are shuffled with it.
+
 * `has_versions`: Set this to `y` if you want several versions of the same exam.
 
 * `versions_csv`: A comma-separated string list of the version names. They will
