@@ -25,6 +25,7 @@
     "has_versions" : false,
     "versions_csv" : "{% if cookiecutter.has_versions %}A,B,C{% endif %}",
     "versions_with_solutions": "",
+    "versions_to_stamp": "",
     "version_randomization_groups" : "",
     "version_course_names" : "",
     "version_times" : "",

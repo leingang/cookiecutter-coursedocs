@@ -4,6 +4,7 @@ import sys
 has_versions = {{ cookiecutter['has_versions'] }}
 versions_csv = "{{ cookiecutter['versions_csv'] }}"
 versions_with_solutions = "{{ cookiecutter['versions_with_solutions'] }}"
+versions_to_stamp = "{{ cookiecutter.get('versions_to_stamp', '') }}"
 {% if cookiecutter.get('version_randomization_groups') -%}
 version_randomization_groups = "{{ cookiecutter['version_randomization_groups'] }}"
 {%- else -%}
@@ -72,6 +73,17 @@ if (__name__ == '__main__'):
                     f"Error: The following versions listed in 'versions_with_solutions' are not present in 'versions_csv': {', '.join(missing)}"
                 )
                 print("Please ensure all versions_with_solutions entries appear in versions_csv.")
+                sys.exit(1)
+        # Likewise, every version in `versions_to_stamp` must be a declared
+        # version.
+        if versions_to_stamp:
+            vts = [v.strip() for v in versions_to_stamp.split(",") if v.strip()]
+            missing = [v for v in vts if v not in versions]
+            if missing:
+                print(
+                    f"Error: The following versions listed in 'versions_to_stamp' are not present in 'versions_csv': {', '.join(missing)}"
+                )
+                print("Please ensure all versions_to_stamp entries appear in versions_csv.")
                 sys.exit(1)
         # If the user provided a `version_randomization_groups` version string, 
         # ensure every version listed there is one of the declared verisons in 

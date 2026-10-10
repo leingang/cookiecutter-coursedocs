@@ -182,6 +182,72 @@ end
 
 next_version = next_version_latex
 
+-- STAMP BARCODES
+-- `l3build stamp` makes individually barcoded copies of the question PDFs
+-- with stampbarcode.  `l3build stamp A B` stamps only those versions,
+-- and `l3build stamp --dry-run` only prints the commands (options go
+-- before version names: `l3build stamp --dry-run A`).
+-- Run `l3build doc` first: this stamps the PDFs that are already built.
+
+-- Where the stamped copies go, relative to this directory.
+-- The default (nil) is the "stamped" directory in builddir.
+stampdir = nil
+-- The offset puts the barcode between the logo and the Aztec code on the
+-- cover, and just above the header on the other pages.
+stampoptions = "--position top --barwidth 1 --offset +70+5"
+-- For each version to stamp: the first barcode number (a string, so that no
+-- digits are lost) and the number of copies.  Versions without an entry are
+-- not stamped.  An exam without versions uses the key "".
+stampjobs = {
+{%- if cookiecutter.get('versions_to_stamp') %}
+{%- for v in cookiecutter.versions_to_stamp.split(',') %}
+    ["{{ v | trim }}"] = {start = "", copies = {{ cookiecutter.number_copies }}},  -- TODO: fill in start
+{%- endfor %}
+{%- else %}
+    -- ["A"] = {start = "1268104881013101", copies = 20},
+{%- endif %}
+}
+
+function stamp(names)
+    local versions = {}
+    if names and #names > 0 then
+        versions = names
+    else
+        for v, _ in pairs(stampjobs) do
+            table.insert(versions, v)
+        end
+        table.sort(versions)
+    end
+    assert(#versions > 0, "Nothing to stamp: stampjobs is empty")
+    local outdir = stampdir or (builddir .. "/stamped")
+    for _, v in ipairs(versions) do
+        local job = assert(stampjobs[v],
+            "No entry for version " .. v .. " in stampjobs")
+        assert(string.match(job.start, "^%d+$"),
+            "Fill in the first barcode number for version " .. v .. " in stampjobs")
+        local pdf = module .. (v ~= "" and ("-" .. v) or "") .. ".qns.pdf"
+        assert(fileexists(pdf),
+            pdf .. " does not exist; run l3build doc first")
+        local cmd = string.format(
+            "stampbarcode --start %s -n %d %s --output-dir \"%s\" %s",
+            job.start, job.copies, stampoptions, outdir, pdf)
+        if options['dry-run'] then
+            print("- " .. cmd)
+        else
+            print("Running '" .. cmd .. "'")
+            local errorlevel = run(".", cmd)
+            assert(errorlevel == 0,
+                "Failed with status " .. errorlevel .. ": " .. cmd)
+        end
+    end
+    return 0
+end
+
+target_list.stamp = {
+    func = stamp,
+    help = "Stamp barcodes on copies of the question PDFs"
+}
+
 -- l3build install --full will install the pdfs in the directory below
 options['texmfhome'] = "{{ cookiecutter.install_dir }}"
 -- TODO set sourcefiles to nil only during installation

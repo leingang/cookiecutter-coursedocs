@@ -68,6 +68,11 @@ This will generate an `l3build` module.
   become extra guards in the `.dtx` file. It's up to the author to do something
   different in each version.
 
+* `versions_to_stamp`: A comma-separated list of the versions that get
+  individually barcoded copies (see *Stamping barcodes* below). Each one gets
+  an entry in `stampjobs` in `build.lua`, with `number_copies` copies and an
+  empty first barcode number to fill in. Defaults to none.
+
 ## Randomization
 
 The generated file will include a six-digit random number seed. If there are
@@ -102,6 +107,16 @@ multiple versions, each will get its own seed.
   wrapped in `\relax` followed by one guarded line per version; when empty,
   `\date` is just the plain `exam_date`.
   Example: `"6A:11:00 a.m.,16A:3:30 p.m."`
+
+## Stamping barcodes
+
+`l3build stamp` runs [`stampbarcode`](https://github.com/leingang/stampbarcode)
+on the built question PDFs, making one copy per barcode number in the
+`stamped` directory of the build directory. Which versions are stamped, their
+first barcode numbers, and their numbers of copies are in the `stampjobs`
+table in `build.lua`. `l3build stamp A B` stamps only those versions, and
+`l3build stamp --dry-run` only prints the commands. Options go before
+version names: `l3build stamp --dry-run A`.
 
 ## Support files
 
