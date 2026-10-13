@@ -73,6 +73,20 @@ This will generate an `l3build` module.
   an entry in `stampjobs` in `build.lua`, with `number_copies` copies and an
   empty first barcode number to fill in. Defaults to none.
 
+* `version_print_groups`: Comma-separated list of version groups
+  (semicolon-separated within a group) that are handed out together, for
+  `l3build print` (see *Printing the stamped copies* below). Copies are
+  interleaved within a group. Defaults to one group of all the versions in
+  `versions_to_stamp`. Example: `"16A;16B,21A;21B;21C;21D"`.
+
+* `print_printers`: Comma-separated list of the printers that `l3build print`
+  splits a batch among.
+
+* `print_ssh`: The command that reaches the machine with `lpr`, such as
+  `ssh netid@print.example.edu`. Empty by default: set it in your config
+  file, or later as `printssh` in `build.lua`. `l3build print` stops with a
+  message while it is empty.
+
 ## Randomization
 
 The generated file will include a six-digit random number seed. If there are
@@ -117,6 +131,27 @@ first barcode numbers, and their numbers of copies are in the `stampjobs`
 table in `build.lua`. `l3build stamp A B` stamps only those versions, and
 `l3build stamp --dry-run` only prints the commands. Options go before
 version names: `l3build stamp --dry-run A`.
+
+## Printing the stamped copies
+
+`l3build print` sends the stamped copies to `lpr`, one job per copy so that
+each can be stapled. Within each group in `printgroups` (in `build.lua`) the
+copies are interleaved by version: the first copy of each version, then the
+second of each, and so on. That sequence is cut into contiguous runs, one per
+printer, so the stacks can be put together in printer order.
+
+The copies and a script of `lpr` commands go to the print host as a tar
+stream over a single ssh connection, so there is one authentication prompt.
+They are unpacked in a new private directory in the home directory there,
+which is removed once every copy is submitted and kept if a submission fails.
+
+* `l3build print A B` prints only those versions.
+* `PRINTERS=mf-07,mf-09 l3build print` chooses the printers for one run.
+* `l3build print --dry-run` shows the plan and connects to nothing. Options
+  go before version names.
+
+The printers, the `lpr` options, and the ssh command are variables in
+`build.lua`.
 
 ## Support files
 
