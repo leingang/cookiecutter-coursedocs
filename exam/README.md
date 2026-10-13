@@ -82,10 +82,11 @@ This will generate an `l3build` module.
 * `print_printers`: Comma-separated list of the printers that `l3build print`
   splits a batch among.
 
-* `print_ssh`: The command that reaches the machine with `lpr`, such as
-  `ssh netid@print.example.edu`. Empty by default: set it in your config
-  file, or later as `printssh` in `build.lua`. `l3build print` stops with a
-  message while it is empty.
+* `print_ssh`: The ssh destination of the machine with `lpr`: a host name,
+  or `user@host`. Defaults to `access.cims.nyu.edu`. With no user name, ssh
+  uses the `User` set for that host in `~/.ssh/config`, or else your local
+  account name. It becomes `printssh = "ssh <destination>"` in `build.lua`;
+  if it is empty, `l3build print` stops with a message.
 
 ## Randomization
 

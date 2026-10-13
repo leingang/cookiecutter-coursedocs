@@ -275,8 +275,9 @@ printgroups = {
 -- interleaved sequence, so the stacks can be put together in printer order.
 printers = {{ '{' }}{% for p in cookiecutter.print_printers.split(',') %}"{{ p | trim }}"{% if not loop.last %}, {% endif %}{% endfor %}{{ '}' }}
 printoptions = "-o sides=two-sided-long-edge -o StapleLocation=UpperLeft"
--- how to reach the machine with lpr, e.g. "ssh netid@print.example.edu"
-printssh = "{{ cookiecutter.print_ssh }}"
+-- How to reach the machine with lpr.  With no user name, ssh uses the User
+-- set for the host in ~/.ssh/config, or else the local account name.
+printssh = "{% if cookiecutter.get('print_ssh') %}ssh {{ cookiecutter.print_ssh }}{% endif %}"
 
 -- The rounds to print: each round is one copy of each version in a group.
 -- Only versions in `wanted` are included; the rest of each group is skipped.

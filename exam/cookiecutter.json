@@ -28,7 +28,7 @@
     "versions_to_stamp": "",
     "version_print_groups": "",
     "print_printers": "mf-06,mf-07,mf-08,mf-09,mf-10,mf-11",
-    "print_ssh": "",
+    "print_ssh": "access.cims.nyu.edu",
     "version_randomization_groups" : "",
     "version_course_names" : "",
     "version_times" : "",
