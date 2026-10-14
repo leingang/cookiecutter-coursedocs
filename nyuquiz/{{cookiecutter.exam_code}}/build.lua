@@ -182,6 +182,17 @@ end
 next_version = next_version_latex
 
 
+-- PERSONALIZED COPIES
+-- `l3build personalize` makes copies with students' names and NetIDs from a
+-- file outside the repository.  See support/personalize.lua.
+-- The student file; STUDENTS=/path/to/file.csv overrides it.
+personalfile = "../../../Students/personalized-exams.csv"
+-- TeX code put before \documentclass in each copy, after the definitions of
+-- \StudentName and \StudentNetID.  The class prints the name and NetID set
+-- with \setstudentname and \setstudentid.
+personalsetup = [[\AddToHook{begindocument/before}{\setstudentname{\StudentName}\setstudentid{\StudentNetID}}]]
+dofile(supportdir .. "/personalize.lua")
+
 -- l3build install --full will install the pdfs in the directory below
 options['texmfhome'] = "../../../Share/"
 -- TODO set sourcefiles to nil only during installation

@@ -442,6 +442,17 @@ target_list.print = {
     help = "Print the stamped copies, interleaved by version"
 }
 
+-- PERSONALIZED COPIES
+-- `l3build personalize` makes copies with students' names and NetIDs from a
+-- file outside the repository.  See support/personalize.lua.
+-- The student file; STUDENTS=/path/to/file.csv overrides it.
+personalfile = "../../../Students/personalized-exams.csv"
+-- TeX code put before \documentclass in each copy, after the definitions of
+-- \StudentName and \StudentNetID.  The .dtx prints them on the cover and
+-- bubble sheet.
+personalsetup = ""
+dofile(supportdir .. "/personalize.lua")
+
 -- l3build install --full will install the pdfs in the directory below
 options['texmfhome'] = "{{ cookiecutter.install_dir }}"
 -- TODO set sourcefiles to nil only during installation

@@ -154,6 +154,31 @@ which is removed once every copy is submitted and kept if a submission fails.
 The printers, the `lpr` options, and the ssh command are variables in
 `build.lua`.
 
+## Personalized copies
+
+`l3build personalize` makes a copy of a version with a student's name and
+NetID on the cover and bubble sheet, e.g. `mt1-abc123.qns.pdf`, for students
+who take the exam somewhere else (the testing center, a proctored makeup).
+The students are listed in a CSV file outside the repository, so that no
+student data is committed: by default `Students/personalized-exams.csv` in
+the course folder, or the file named by `STUDENTS=/path/to/file.csv`.
+
+```
+exam,netid,name,version
+*,abc123,"Doe, Jane",A 1100
+mt* final,xyz789,José Núñez,A
+```
+
+* `exam`: globs separated by spaces, matched against the module name.
+* `version`: versions separated by spaces; the first one the module has is
+  used. A module without versions ignores it.
+
+Run `l3build doc` first. The copies go to the `personalized` directory of the
+build directory, never to the module or install directory.
+`l3build personalize abc123` makes only that copy, and
+`l3build personalize --dry-run` shows the plan. The code is in
+`support/personalize.lua`.
+
 ## Support files
 
 * `command-verbs.tex`: a glossary of IB command terms (explain, prove, …).

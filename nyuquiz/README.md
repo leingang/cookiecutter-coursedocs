@@ -94,6 +94,31 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
 
 
 
+# Personalized copies
+
+`l3build personalize` makes a copy of a version with a student's name and
+NetID in the Full Name and NetID boxes, e.g. `q05-abc123.qns.pdf`, for students
+who take the quiz somewhere else (the testing center, a proctored makeup).
+The students are listed in a CSV file outside the repository, so that no
+student data is committed: by default `Students/personalized-exams.csv` in
+the course folder, or the file named by `STUDENTS=/path/to/file.csv`.
+
+```
+exam,netid,name,version
+*,abc123,"Doe, Jane",A 1100
+mt* final,xyz789,José Núñez,A
+```
+
+* `exam`: globs separated by spaces, matched against the module name.
+* `version`: versions separated by spaces; the first one the module has is
+  used. A module without versions ignores it.
+
+Run `l3build doc` first. The copies go to the `personalized` directory of the
+build directory, never to the module or install directory.
+`l3build personalize abc123` makes only that copy, and
+`l3build personalize --dry-run` shows the plan. The code is in
+`support/personalize.lua`.
+
 # Testing
 
 ## Automatic testing

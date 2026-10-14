@@ -173,6 +173,12 @@
 
 \setlength{\answerskip}{1cm}
 
+% A personalized copy (`l3build personalize`) defines these before
+% \documentclass, to print the student's name and NetID on the cover and
+% bubble sheet.
+\providecommand\StudentName{}
+\providecommand\StudentNetID{}
+
 % points of question types
 \newcommand{\mcpoints}{
 {%- endraw -%}
@@ -220,6 +226,7 @@
               Name:
     
               \ifprintanswers\sffamily\Huge\color{UltraViolet} Solutions\fi
+              \ifdefempty{\StudentName}{}{\sffamily\LARGE\StudentName}
             \end{minipage}
       }\hfill\vspace{5ex}
     \end{minipage}
@@ -227,6 +234,8 @@
         \hfill\fbox{
             \begin{minipage}[b][1.35cm][t]{.9\linewidth}
               NetID:
+
+              \ifdefempty{\StudentNetID}{}{\sffamily\LARGE\StudentNetID}
             \end{minipage}
       }\hfill\vspace{5ex}
     \end{minipage}
@@ -379,6 +388,15 @@ FT \(\Box\)
         at (0.5in,-1.5in) {
             \makeatletter\@date\makeatother
         };
+    % personalized copies: name and NetID
+    \ifdefempty{\StudentName}{}{
+        \node[bubble sheet fill in,anchor=south west]
+            at (0.5in,-0.03in) {\StudentName};
+    }
+    \ifdefempty{\StudentNetID}{}{
+        \node[bubble sheet fill in,anchor=south west]
+            at (0.5in,-0.5in) {\StudentNetID};
+    }
 \end{tikzpicture}
 \examcleardoublepage
 \fi
