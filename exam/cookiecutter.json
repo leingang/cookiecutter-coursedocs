@@ -27,6 +27,7 @@
     "versions_with_solutions": "",
     "versions_to_stamp": "",
     "version_print_groups": "",
+    "version_bubble_sheets": "{% for v in cookiecutter.versions_csv.split(',') if v.strip() %}{% set c = v.strip()[-1] | upper %}{{ v.strip() }}:{{ c if c in 'ABCDE' else 'ABCDE'[loop.index0 % 5] }}{% if not loop.last %},{% endif %}{% endfor %}",
     "print_printers": "mf-06,mf-07,mf-08,mf-09,mf-10,mf-11",
     "print_ssh": "access.cims.nyu.edu",
     "version_randomization_groups" : "",

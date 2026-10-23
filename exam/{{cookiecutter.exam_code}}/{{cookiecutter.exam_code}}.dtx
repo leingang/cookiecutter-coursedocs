@@ -306,20 +306,39 @@ FT \(\Box\)
     overlay,
     remember picture,
     whiteout/.style={draw=none,fill=white},
-    highlightbox/.style={draw=Magenta,line width=1.8pt,rounded corners=4pt}
+    highlightbox/.style={draw=Magenta,line width=1.8pt,rounded corners=4pt},
+    version bubble/.style={draw=none,fill=black}
 ]
-    \node at (current page.center) {
-{%  endraw -%}
-{% set letters = ['A','B','C','D','E'] %}
-{%- if versions -%}
-{%- for v in versions -%}
-%<{{v}}>\includegraphics{{ ("mc_bubble_sheet_" + letters[loop.index0 % 5]) | embrace}}
-{% endfor -%}
+    \node at (current page.center) {\includegraphics{mc_bubble_sheet}};
+    % Bubble sheet version: white out the "Version" label and fill in the
+    % bubble.  Bubbles A--E are centered 70.88bp below the top of the page,
+    % 18bp apart, starting 363.88bp from the left.
+    \fill[whiteout] ([xshift=313bp,yshift=-65bp]current page.north west)
+        rectangle ([xshift=355bp,yshift=-77bp]current page.north west);
+{%- endraw %}
+{%- set letters = ['A','B','C','D','E'] %}
+{#-
+    Map versions to bubble sheet letters from `version_bubble_sheets`
+    ("21A;16A:A,21B;16B:B"). Unmapped versions cycle through A--E.
+-#}
+{%- set bubble_map = {} %}
+{%- if cookiecutter.get('version_bubble_sheets') %}
+{%- for group in cookiecutter.version_bubble_sheets.split(',') if group.strip() %}
+{%- set gv, gl = group.split(':', 1) %}
+{%- for v in gv.split(';') %}
+{%- set _ = bubble_map.update({v | trim: gl | trim | upper}) %}
+{%- endfor %}
+{%- endfor %}
+{%- endif %}
+{%- if versions %}
+{%- for v in versions %}
+{%- set letter = bubble_map.get(v, letters[loop.index0 % 5]) %}
+%<{{v}}>    \fill[version bubble] ([xshift={{ "%.2f" | format(363.88 + 18 * letters.index(letter)) }}bp,yshift=-70.88bp]current page.north west) circle[radius=5.5bp];% {{ letter }}
+{%- endfor %}
 {%- else %}
-\includegraphics{{ ("mc_bubble_sheet_" + letters[0]) | embrace}}
-{% endif %}
-{%  raw -%}
-};
+    \fill[version bubble] ([xshift=363.88bp,yshift=-70.88bp]current page.north west) circle[radius=5.5bp];% A
+{%- endif %}
+{%- raw %}
     % White out unused rows to avoid confusion
     % LL = lower left corner of bubble matrix
     % UR = upper right corner of bubble matrix

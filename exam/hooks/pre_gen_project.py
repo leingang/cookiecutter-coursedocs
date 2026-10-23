@@ -6,6 +6,7 @@ versions_csv = "{{ cookiecutter['versions_csv'] }}"
 versions_with_solutions = "{{ cookiecutter['versions_with_solutions'] }}"
 versions_to_stamp = "{{ cookiecutter.get('versions_to_stamp', '') }}"
 version_print_groups = "{{ cookiecutter.get('version_print_groups', '') }}"
+version_bubble_sheets = "{{ cookiecutter.get('version_bubble_sheets', '') }}"
 {% if cookiecutter.get('version_randomization_groups') -%}
 version_randomization_groups = "{{ cookiecutter['version_randomization_groups'] }}"
 {%- else -%}
@@ -97,6 +98,26 @@ if (__name__ == '__main__'):
                 )
                 print("Please ensure all version_print_groups entries appear in versions_csv.")
                 sys.exit(1)
+        # `version_bubble_sheets` maps groups of versions (separated by
+        # semicolons) to a bubble sheet version A-E, e.g. "21A;16A:A,21B:B".
+        if version_bubble_sheets:
+            for group in [g for g in version_bubble_sheets.split(",") if g.strip()]:
+                if ":" not in group:
+                    print(f"Error: '{group.strip()}' in 'version_bubble_sheets' is not of the form 'versions:letter'.")
+                    sys.exit(1)
+                gv, letter = group.split(":", 1)
+                missing = [v.strip() for v in gv.split(";") if v.strip() and v.strip() not in versions]
+                if missing:
+                    print(
+                        f"Error: The following versions listed in 'version_bubble_sheets' are not present in 'versions_csv': {', '.join(missing)}"
+                    )
+                    print("Please ensure all version_bubble_sheets entries appear in versions_csv.")
+                    sys.exit(1)
+                if letter.strip().upper() not in ["A", "B", "C", "D", "E"]:
+                    print(
+                        f"Error: '{letter.strip()}' in 'version_bubble_sheets' is not a bubble sheet version (A, B, C, D, or E)."
+                    )
+                    sys.exit(1)
         # If the user provided a `version_randomization_groups` version string, 
         # ensure every version listed there is one of the declared verisons in 
         # versions_csv.

@@ -79,6 +79,18 @@ This will generate an `l3build` module.
   interleaved within a group. Defaults to one group of all the versions in
   `versions_to_stamp`. Example: `"16A;16B,21A;21B;21C;21D"`.
 
+* `version_bubble_sheets`: Comma-separated list of `versions:letter` pairs
+  (versions grouped with semicolons) giving the Gradescope bubble sheet
+  version, A through E, filled in for each exam version. The suggested
+  default maps each version ending in A–E to that letter, e.g. `21A,21B,16A`
+  gives `21A:A,21B:B,16A:A`. Versions left out, or all versions if this is
+  empty, cycle through A–E in `versions_csv` order. The template ships one
+  blank `support/mc_bubble_sheet.pdf`; the bubble is drawn with TikZ and the
+  sheet's "Version" label is whited out. Example: `"21A;16A:A,21B;16B:B"`.
+  In a YAML config, give this (and the other version lists) as a quoted
+  one-line string or with `>-`: a plain `>` block keeps a trailing newline,
+  which breaks the pre-generation hook.
+
 * `print_printers`: Comma-separated list of the printers that `l3build print`
   splits a batch among.
 
