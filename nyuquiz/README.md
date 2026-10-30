@@ -119,6 +119,18 @@ build directory, never to the module or install directory.
 `l3build personalize --dry-run` shows the plan. The code is in
 `support/personalize.lua`.
 
+# Gradescope files
+
+When the [exam-gradescope](https://github.com/nyumathclinic/exam-gradescope)
+package is installed, the quiz loads it, and each LuaLaTeX run writes the
+Gradescope outline (`\jobname.outline.json`), with the `\insertidfields` boxes
+as its name and ID regions, and the rubrics (`\jobname.rubric.json`) next to
+the PDF. `edubag gradescope client setup-exam` picks both up.
+Multiple-choice and check-all-that-apply rubrics are made from
+`\CorrectChoice`. Free-response rubrics go in a `rubric` environment or
+`\userubric{basic}`, using the `basic` preset declared in the preamble.
+Without the package these are ignored.
+
 # Testing
 
 ## Automatic testing

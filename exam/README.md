@@ -204,7 +204,27 @@ build directory, never to the module or install directory.
 
 * `aux_to_csv.lua`: when building solutions with LuaLaTeX, writes
   `\jobname.csv` with each question's correct choice and point value, for
-  uploading an answer key to Gradescope.
+  uploading an answer key to Gradescope. It is used only when the
+  `exam-gradescope` package is not installed.
+
+## Gradescope files
+
+When the [exam-gradescope](https://github.com/nyumathclinic/exam-gradescope)
+package is installed, the exam loads it with `mc=bubble`. Each LuaLaTeX run
+then writes, next to the PDF:
+
+* `\jobname.key.csv`: the bubble-sheet answer key (the multiple-choice and
+  check-all-that-apply questions)
+* `\jobname.outline.json` and `\jobname.rubric.json`: the Gradescope outline
+  and rubrics of the free-response questions, for
+  `edubag gradescope client setup-exam`. The Name and NetID boxes on the
+  cover are its name and ID regions.
+* `\jobname.json`: a manifest of all the questions, for item analysis
+
+Write a free-response question's rubric in a `rubric` environment, or with
+`\userubric` and a preset from `\DeclareRubric`; see the package
+documentation. Without the package these are ignored, and the answer key comes
+from `aux_to_csv.lua` as before.
 
 ## Testing
 

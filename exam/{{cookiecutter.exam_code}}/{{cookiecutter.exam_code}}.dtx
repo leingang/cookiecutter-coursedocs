@@ -144,12 +144,28 @@
   % Should be single backlash, single percent, in double quotes
   \luaexec{PERCENT_CHAR = "\%"}
   \directlua{utils = require("utils")}
-  % Write the answer key to \jobname.csv (question, answer, points)
-  \ifprintanswers
-    \directlua{aux_to_csv = require("aux_to_csv")}
-    \directlua{aux_to_csv.register_for_job(tex.jobname)}
-  \fi
+  % exam-gradescope writes the bubble-sheet answer key (\jobname.key.csv),
+  % the Gradescope outline and rubrics of the free-response questions, and a
+  % question manifest. Without it, write the answer key to \jobname.csv
+  % (question, answer, points) when building solutions.
+  \IfFileExists{exam-gradescope.sty}{%
+    \usepackage[mc=bubble]{exam-gradescope}%
+  }{%
+    \ifprintanswers
+      \directlua{aux_to_csv = require("aux_to_csv")}
+      \directlua{aux_to_csv.register_for_job(tex.jobname)}
+    \fi
+  }
 \fi
+% Without exam-gradescope, its rubrics and settings are ignored.
+\IfPackageLoadedF{exam-gradescope}{%
+  \ProvideDocumentCommand\gradescopesetup{m}{}%
+  \ProvideDocumentCommand\gradescopequestion{m}{}%
+  \ProvideDocumentCommand\GradescopeRegion{m +m}{#2}%
+  \ProvideDocumentEnvironment{rubric}{O{} +b}{}{}%
+  \ProvideDocumentCommand\DeclareRubric{O{} m +m}{}%
+  \ProvideDocumentCommand\userubric{m +O{}}{}%
+}
 
 {% endraw -%}
 {%- if cookiecutter.get('extra_latex_packages') %}
@@ -221,23 +237,23 @@
     \maketitle
     {\setlength{\parindent}{0pt}%
     \begin{minipage}[b]{8cm}
-        \hfill\fbox{
+        \hfill\GradescopeRegion{name}{\fbox{
             \begin{minipage}[b][1.35cm][t]{.9\linewidth}
               Name:
     
               \ifprintanswers\sffamily\Huge\color{UltraViolet} Solutions\fi
               \ifdefempty{\StudentName}{}{\sffamily\LARGE\StudentName}
             \end{minipage}
-      }\hfill\vspace{5ex}
+      }}\hfill\vspace{5ex}
     \end{minipage}
     \begin{minipage}[b]{8cm}
-        \hfill\fbox{
+        \hfill\GradescopeRegion{sid}{\fbox{
             \begin{minipage}[b][1.35cm][t]{.9\linewidth}
               NetID:
 
               \ifdefempty{\StudentNetID}{}{\sffamily\LARGE\StudentNetID}
             \end{minipage}
-      }\hfill\vspace{5ex}
+      }}\hfill\vspace{5ex}
     \end{minipage}
     \hspace*{\fill}
     }

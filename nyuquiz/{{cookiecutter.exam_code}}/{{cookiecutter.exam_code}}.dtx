@@ -117,7 +117,26 @@
   % Should be single backlash, single percent, in double quotes
   \luaexec{PERCENT_CHAR = "\%"}
   \directlua{utils = require("utils")}
+  % exam-gradescope writes the Gradescope outline (\jobname.outline.json) and
+  % rubrics (\jobname.rubric.json) for `edubag gradescope client setup-exam`.
+  \IfFileExists{exam-gradescope.sty}{\usepackage{exam-gradescope}}{}
 \fi
+% Without exam-gradescope, its rubrics and settings are ignored.
+\IfPackageLoadedF{exam-gradescope}{%
+  \ProvideDocumentCommand\gradescopesetup{m}{}%
+  \ProvideDocumentCommand\gradescopequestion{m}{}%
+  \ProvideDocumentCommand\GradescopeRegion{m +m}{#2}%
+  \ProvideDocumentEnvironment{rubric}{O{} +b}{}{}%
+  \ProvideDocumentCommand\DeclareRubric{O{} m +m}{}%
+  \ProvideDocumentCommand\userubric{m +O{}}{}%
+}
+% Free-response rubric; weights are fractions of the question's points.
+\DeclareRubric{basic}{
+  \item[1]   Correct
+  \item[5/6] Mostly correct, but small mistakes
+  \item[2/3] Major mistakes
+  \item[1/3] Nice try
+  \item[0]   No response, or no creditable work shown}
 
 {%- endraw %}
 {%- if cookiecutter.get('extra_latex_packages') %}
@@ -202,12 +221,18 @@ If you wish to change your selection, erase your marks completely.
     Why are you taking this course?  What would you like to learn?
     \begin{solution}[\stretch{1}]        
     \end{solution}
+    \userubric{basic}
 \end{question}
 
 \begin{question}[3]\label{FR-map}
     Draw a map of your home town, and indicate on the map where you live.
     \begin{solution}[\stretch{1}]        
     \end{solution}    
+    \begin{rubric}
+        \item[3] Map of the town, with home marked
+        \item[2] Map of the town, but home not marked
+        \item[0] No response, or no creditable work shown
+    \end{rubric}
 \end{question}
 
 \end{questions}

@@ -66,7 +66,25 @@ function typeset(file)
     errorlevel = run(typesetdir,cmd)
     assert(errorlevel == 0, 
         "Failed with status " .. errorlevel .. ": " .. cmd)
+    copy_gradescope_files(name)
     return errorlevel
+end
+
+-- The exam-gradescope package (if it is used) writes Gradescope files next to
+-- each PDF.  Copy the blank copies' files to the module directory, where
+-- `edubag gradescope client setup-exam` looks for them beside the PDFs.
+-- Solutions and personalized copies (which are not unpacked) are skipped.
+gradescopeexts = {".outline.json", ".rubric.json", ".key.csv", ".json"}
+function copy_gradescope_files(name)
+    if string.match(name, "%.sol$")
+        or not fileexists(unpackdir .. "/" .. name .. ".tex") then
+        return
+    end
+    for _, ext in ipairs(gradescopeexts) do
+        if fileexists(typesetdir .. "/" .. name .. ext) then
+            cp(name .. ext, typesetdir, currentdir)
+        end
+    end
 end
 
 -- TAG FILES
