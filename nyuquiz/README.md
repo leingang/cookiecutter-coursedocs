@@ -19,7 +19,7 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
 - `exam_date` (date template)
     - Default date inserted into documents. By default it uses the current date in YYYY-MM-DD format via a Jinja `now` expression.
 
-- `course_name`, `instructor_name`, `term_name`, `site_id` (strings)
+- `course_name`, `instructor_name`, `term_name`, `gradescope_course_id` (strings)
     - Optional metadata strings used in headers/footers and in generated LaTeX sources.
 
 - `short_course_name` (string template)
@@ -125,11 +125,22 @@ When the [exam-gradescope](https://github.com/nyumathclinic/exam-gradescope)
 package is installed, the quiz loads it, and each LuaLaTeX run writes the
 Gradescope outline (`\jobname.outline.json`), with the `\insertidfields` boxes
 as its name and ID regions, and the rubrics (`\jobname.rubric.json`) next to
-the PDF. `edubag gradescope client setup-exam` picks both up.
+the PDF in the build directory (`build/doc`).
 Multiple-choice and check-all-that-apply rubrics are made from
 `\CorrectChoice`. Free-response rubrics go in a `rubric` environment or
 `\userubric{basic}`, using the `basic` preset declared in the preamble.
 Without the package these are ignored.
+
+After `l3build doc`, `l3build gradescope` sets the quiz up on Gradescope: it
+writes `build/doc/<exam_code>.yml` from the GRADESCOPE settings in
+`build.lua` (the course ID from `gradescope_course_id`, the version set's
+title, and each version's assignment title, by default
+"<exam_name> - <version>") and runs `edubag gradescope client setup-exam`
+with it. That creates the assignments, saves the outlines, imports the
+rubrics, groups the versions in a version set and, when a question is free
+response, sets "Student visibility" to "Show applied rubric items only".
+`l3build gradescope --dry-run` only reports what would change;
+`EDUBAG=...` sets the command that runs edubag.
 
 # Testing
 

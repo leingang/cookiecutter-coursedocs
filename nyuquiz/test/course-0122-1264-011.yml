@@ -10,7 +10,7 @@ default_context:
   course_name: "MATH-UA 122.011 Calculus II"
   short_course_name: "MATH-UA 122"
   term_name: "Spring 2026"
-  site_id: "12983673"
+  gradescope_course_id: "12983673"
   number_copies: 30
   bundle_name: coursedocs-0122-1264-011
   extra_latex_packages: "leincalc-fall22"

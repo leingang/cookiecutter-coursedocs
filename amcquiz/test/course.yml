@@ -9,7 +9,7 @@ default_context:
   term_year: "2024"
   course_name: "MATH-UA 123.003+004 Calculus III"
   term_name: "Fall 2024"
-  site_id: "384278"
+  gradescope_course_id: "384278"
   number_copies: 39
   bundle_name: calc3-fa24-docs
 # unused

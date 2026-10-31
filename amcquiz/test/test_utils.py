@@ -23,7 +23,7 @@ def default_replay_context(**overrides):
             "course_name": "",
             "instructor_name": "",
             "term_name": "",
-            "site_id": "",
+            "gradescope_course_id": "",
             "number_copies": 45,
             "use_nyu_fonts": False,
             "has_versions": False,

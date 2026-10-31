@@ -211,7 +211,7 @@ build directory, never to the module or install directory.
 
 When the [exam-gradescope](https://github.com/nyumathclinic/exam-gradescope)
 package is installed, the exam loads it with `mc=bubble`. Each LuaLaTeX run
-then writes, next to the PDF:
+then writes, next to the PDF in the build directory (`build/doc`):
 
 * `\jobname.key.csv`: the bubble-sheet answer key (the multiple-choice and
   check-all-that-apply questions)
@@ -225,6 +225,17 @@ Write a free-response question's rubric in a `rubric` environment, or with
 `\userubric` and a preset from `\DeclareRubric`; see the package
 documentation. Without the package these are ignored, and the answer key comes
 from `aux_to_csv.lua` as before.
+
+After `l3build doc`, `l3build gradescope` sets the free-response part up on
+Gradescope: it writes `build/doc/<exam_code>.yml` from the GRADESCOPE
+settings in `build.lua` (the course ID from `gradescope_course_id`, the
+version set's title, and each version's assignment title, by default
+"<exam_name> - <version>") and runs `edubag gradescope client setup-exam`
+with it. That creates the assignments, saves the outlines, imports the
+rubrics, groups the versions in a version set, and sets "Student visibility"
+to "Show applied rubric items only" (change `gradescopevisibility` for
+another choice). `l3build gradescope --dry-run` only reports what would
+change; `EDUBAG=...` sets the command that runs edubag.
 
 ## Testing
 

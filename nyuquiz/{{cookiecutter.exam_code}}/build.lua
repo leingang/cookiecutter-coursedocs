@@ -65,26 +65,9 @@ function typeset(file)
     errorlevel = run(typesetdir,cmd)
     assert(errorlevel == 0, 
         "Failed with status " .. errorlevel .. ": " .. cmd)
-    copy_gradescope_files(name)
     return errorlevel
 end
 
--- The exam-gradescope package (if it is used) writes Gradescope files next to
--- each PDF.  Copy the blank copies' files to the module directory, where
--- `edubag gradescope client setup-exam` looks for them beside the PDFs.
--- Solutions and personalized copies (which are not unpacked) are skipped.
-gradescopeexts = {".outline.json", ".rubric.json", ".key.csv", ".json"}
-function copy_gradescope_files(name)
-    if string.match(name, "%.sol$")
-        or not fileexists(unpackdir .. "/" .. name .. ".tex") then
-        return
-    end
-    for _, ext in ipairs(gradescopeexts) do
-        if fileexists(typesetdir .. "/" .. name .. ext) then
-            cp(name .. ext, typesetdir, currentdir)
-        end
-    end
-end
 
 -- TAG FILES
 -- decorator to only run if repo is clean
@@ -198,6 +181,101 @@ function tag_hook(version,tagdate)
 end
 
 next_version = next_version_latex
+
+
+-- GRADESCOPE
+-- `l3build gradescope` sets the exam up on Gradescope with
+-- `edubag gradescope client setup-exam`: it creates each version's
+-- assignment, saves the outline and imports the rubrics that exam-gradescope
+-- wrote next to the PDFs in the build directory, and groups the versions in a
+-- version set.  The config it gives edubag is written there too
+-- (<module>.yml).  Every step is skipped if it is already done, so it can be
+-- run again.  `l3build gradescope --dry-run` only reports what would change,
+-- and `l3build gradescope replace-rubrics headed` passes --replace-rubrics
+-- and --headed to edubag (options go before those words).
+-- Run `l3build doc` first: this uses the files it made.
+-- Questions on the bubble sheet are not on Gradescope; their answer key is
+-- <module>-<version>.qns.key.csv in the build directory.
+
+-- The command to run edubag; EDUBAG=... overrides it.
+gradescopecmd = os.getenv("EDUBAG") or "edubag"
+-- The Gradescope course ID.
+gradescopecourse = "{{ cookiecutter.gradescope_course_id }}"
+-- The title of the version set.
+gradescopetitle = "{{ cookiecutter.exam_name }}"
+-- Each version and the title of its assignment, in order.  An exam without
+-- versions uses the version "".
+gradescopeversions = {
+{%- set gsversions = cookiecutter.versions_csv.split(',') | map('trim') | select | list %}
+{%- for v in gsversions %}
+    {"{{ v }}", "{{ cookiecutter.exam_name }} - {{ v }}"},
+{%- else %}
+    {"", "{{ cookiecutter.exam_name }}"},
+{%- endfor %}
+}
+-- What students see of the rubric on their graded work, when some question
+-- on Gradescope is free response: all, applied, by_scoring or hidden.
+-- nil leaves Gradescope's setting alone.
+gradescopevisibility = "applied"
+
+local function yaml_string(s)
+    return '"' .. s:gsub('\\', '\\\\'):gsub('"', '\\"') .. '"'
+end
+
+function gradescope(names)
+    local flags = {["replace-rubrics"] = "--replace-rubrics", headed = "--headed"}
+    local args = options['dry-run'] and " --dry-run" or ""
+    for _, name in ipairs(names or {}) do
+        args = args .. " " .. assert(flags[name], "Unknown word '" .. name
+            .. "' (use replace-rubrics or headed)")
+    end
+    assert(string.match(gradescopecourse, "^%d+$"),
+        "Fill in gradescopecourse, the Gradescope course ID, in build.lua")
+    local entries, frq = {}, false
+    for _, pair in ipairs(gradescopeversions) do
+        local v, title = pair[1], pair[2]
+        local job = module .. (v ~= "" and ("-" .. v) or "") .. ".qns"
+        assert(fileexists(typesetdir .. "/" .. job .. ".pdf"),
+            job .. ".pdf is not in " .. typesetdir .. "; run l3build doc first")
+        -- A version without an outline has nothing on Gradescope.
+        if fileexists(typesetdir .. "/" .. job .. ".outline.json") then
+            table.insert(entries, string.format("  %s: {pdf: %s, assignment: %s}",
+                yaml_string(v ~= "" and v or module), yaml_string(job .. ".pdf"),
+                yaml_string(title)))
+            local f = io.open(typesetdir .. "/" .. job .. ".json")
+            if f then
+                local manifest = f:read("a")
+                f:close()
+                frq = frq or string.find(manifest,
+                    '"type": "frq",%s*"destination": "gradescope"') ~= nil
+            end
+        end
+    end
+    if #entries == 0 then
+        print("Nothing in " .. module .. " is graded on Gradescope.")
+        return 0
+    end
+    local config = module .. ".yml"
+    local f = assert(io.open(typesetdir .. "/" .. config, "w"))
+    f:write("# Written by `l3build gradescope` from build.lua.\n",
+        "course: ", yaml_string(gradescopecourse), "\n",
+        "title: ", yaml_string(gradescopetitle), "\n")
+    if frq and gradescopevisibility then
+        f:write("student_visibility: ", gradescopevisibility, "\n")
+    end
+    f:write("versions:\n", table.concat(entries, "\n"), "\n")
+    f:close()
+    local cmd = gradescopecmd .. " gradescope client setup-exam " .. config .. args
+    print("Running '" .. cmd .. "' in " .. typesetdir)
+    local errorlevel = run(typesetdir, cmd)
+    assert(errorlevel == 0, "Failed with status " .. errorlevel .. ": " .. cmd)
+    return 0
+end
+
+target_list.gradescope = {
+    func = gradescope,
+    help = "Set the exam up on Gradescope"
+}
 
 
 -- PERSONALIZED COPIES

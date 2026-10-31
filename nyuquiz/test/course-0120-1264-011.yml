@@ -10,7 +10,7 @@ default_context:
   course_name: "MATH-UA 120.011+016 Discrete Mathematics"
   short_course_name: "Discrete Math"
   term_name: "Spring 2026"
-  site_id: "12983673"
+  gradescope_course_id: "12983673"
   number_copies: 30
   bundle_name: coursedocs-0120-1264-011
 # unused

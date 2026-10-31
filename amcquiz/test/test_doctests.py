@@ -121,7 +121,7 @@ def test_doctests_hooks_in_rendered_template(tmp_path: Path):
             "course_name": "",
             "instructor_name": "",
             "term_name": "",
-            "site_id": "",
+            "gradescope_course_id": "",
             "number_copies": 45,
             "has_versions": False,
             "use_nyu_fonts": False,

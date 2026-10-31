@@ -20,7 +20,7 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
 - `exam_date` (date template)
     - Default date inserted into documents. By default it uses the current date in YYYY-MM-DD format via a Jinja `now` expression.
 
-- `course_name`, `instructor_name`, `term_name`, `site_id` (strings)
+- `course_name`, `instructor_name`, `term_name`, `gradescope_course_id` (strings)
     - Optional metadata strings used in headers/footers and in generated LaTeX sources.
 
 - `number_copies` (int)

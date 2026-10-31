@@ -7,7 +7,7 @@
     "short_course_name" : "{{ cookiecutter.course_name }}",
     "instructor_name" : "",
     "term_name" : "",
-    "site_id" : "",
+    "gradescope_course_id" : "",
     "section_number" : "",
     "use_bubble_sheet": true,
     "use_barcode": true,

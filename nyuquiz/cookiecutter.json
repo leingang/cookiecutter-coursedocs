@@ -7,7 +7,7 @@
     "short_course_name" : "{{ cookiecutter.course_name }}",
     "instructor_name" : "",
     "term_name" : "",
-    "site_id" : "",
+    "gradescope_course_id" : "",
     "quiz_duration" : 20,
     "number_copies" : 45,
     "has_versions" : false,
