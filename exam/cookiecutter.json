@@ -33,6 +33,7 @@
     "version_randomization_groups" : "",
     "version_course_names" : "",
     "version_times" : "",
+    "gradescope_assignment_format" : "{exam_name} - {version}",
     "extra_latex_packages" : "",
     "extra_tikz_libraries" : "",
     "bundle_name": "",

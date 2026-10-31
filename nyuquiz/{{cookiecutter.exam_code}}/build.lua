@@ -203,12 +203,17 @@ gradescopecmd = os.getenv("EDUBAG") or "edubag"
 gradescopecourse = "{{ cookiecutter.gradescope_course_id }}"
 -- The title of the version set.
 gradescopetitle = "{{ cookiecutter.exam_name }}"
--- Each version and the title of its assignment, in order.  An exam without
+-- Each version and the title of its assignment, in order (made from
+-- gradescope_assignment_format when the template was used).  An exam without
 -- versions uses the version "".
 gradescopeversions = {
 {%- set gsversions = cookiecutter.versions_csv.split(',') | map('trim') | select | list %}
+{%- set gstimes = {} %}
+{%- for pair in cookiecutter.version_times.split(',') if ':' in pair %}
+{%- set _ = gstimes.update({pair.split(':', 1)[0] | trim: pair.split(':', 1)[1] | trim}) %}
+{%- endfor %}
 {%- for v in gsversions %}
-    {"{{ v }}", "{{ cookiecutter.exam_name }} - {{ v }}"},
+    {"{{ v }}", "{{ cookiecutter.gradescope_assignment_format | replace('{exam_name}', cookiecutter.exam_name) | replace('{version}', v) | replace('{time}', gstimes.get(v, v)) }}"},
 {%- else %}
     {"", "{{ cookiecutter.exam_name }}"},
 {%- endfor %}

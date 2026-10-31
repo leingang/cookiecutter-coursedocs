@@ -134,8 +134,11 @@ Without the package these are ignored.
 After `l3build doc`, `l3build gradescope` sets the quiz up on Gradescope: it
 writes `build/doc/<exam_code>.yml` from the GRADESCOPE settings in
 `build.lua` (the course ID from `gradescope_course_id`, the version set's
-title, and each version's assignment title, by default
-"<exam_name> - <version>") and runs `edubag gradescope client setup-exam`
+title, and each version's assignment title, made from
+`gradescope_assignment_format`: `{exam_name}`, `{version}` and `{time}` (the
+version's time in `version_times`) are replaced, so
+`"{exam_name} {time} edition"` gives "Quiz 6 9:30 a.m. edition"; the default
+is `"{exam_name} - {version}"`) and runs `edubag gradescope client setup-exam`
 with it. That creates the assignments, saves the outlines, imports the
 rubrics, groups the versions in a version set and, when a question is free
 response, sets "Student visibility" to "Show applied rubric items only".
