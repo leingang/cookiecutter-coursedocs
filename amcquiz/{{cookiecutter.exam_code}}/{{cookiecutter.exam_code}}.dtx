@@ -108,7 +108,10 @@
 {% raw %}
 \usepackage{titling}
 \usepackage{changepage}%      For the `adjustwidth' environment
-\usepackage{markversion}
+% The version, date, and git revision in a footnote under the title.
+% markversion asks git through gitinfo-lua, which needs LuaLaTeX with
+% --shell-escape (latexmkrc).
+\usepackage[infootnote,watermark-color=LightViolet2,modified-color=Magenta]{markversion}
 
 \usepackage{xcolor-nyu22}[2022/08/05]
 % In the contemporary/subtle tone quadrant, we use sans for the main text and

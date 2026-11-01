@@ -4,7 +4,7 @@ This test does the following:
  - writes a valid replay file into the pytest tmp path
  - runs `python -m cookiecutter` to render the template into the tmp path
  - initializes a git repository and makes an initial commit in the generated
-   project directory (so `vc.lua` can read git metadata)
+   project directory (so markversion can read git metadata)
  - runs `l3build doc --halt-on-error --show-log-on-error` inside the generated
    project and asserts it exits with code 0.
 
@@ -86,7 +86,7 @@ def test_l3build_doc_versions_with_solutions(tmp_path: Path):
     assert gen_dir.exists(), f"generated directory not found: {gen_dir}"
 
     try:
-        # Init git so vc.lua can get metadata
+        # Init git so markversion can read metadata (through gitinfo-lua)
         subprocess.run(["git", "init"], cwd=str(gen_dir), check=True)
         subprocess.run(["git", "add", "-A"], cwd=str(gen_dir), check=True)
         subprocess.run(["git", "commit", "-m", "initial", "--author", "tester <tester@example.com>"], cwd=str(gen_dir), check=True)

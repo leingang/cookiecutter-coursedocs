@@ -103,6 +103,9 @@
 \pgfmathsetseed{\randomseed}
 \usepackage[overload]{exam-randomizechoices}
 \setrandomizerseed{\randomseed}
+% The version, date, and git revision in the footers. markversion asks git
+% through gitinfo-lua, which needs LuaLaTeX with --shell-escape (latexmkrc).
+\usepackage{markversion}
 {% endraw -%}
 {%- if cookiecutter.get('use_randomlist') -%}
 \usepackage{randomlist}

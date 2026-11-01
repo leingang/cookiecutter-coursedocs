@@ -95,17 +95,9 @@
 {%- endif %}
 {% raw %}
 
-\usepackage{markversion}% Sets \VCRevisionMod and provides \UseVersionOf
-\footer% all non-cover pages
-    {\UseVersionOf{\jobname.tex}, \UseDateOf{\jobname.tex}}
-    {\thepage/\numpages}
-    {Revision \VCRevisionMod}
-\makeatletter
-\coverfooter% footer on cover pages only
-    {\run@lfoot}
-    {}
-    {\run@rfoot}
-\makeatother
+% The version, date, and git revision in the footers. markversion asks git
+% through gitinfo-lua, which needs LuaLaTeX with --shell-escape (latexmkrc).
+\usepackage{markversion}
 
 
 

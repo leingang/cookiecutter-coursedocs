@@ -191,6 +191,17 @@ build directory, never to the module or install directory.
 `l3build personalize --dry-run` shows the plan. The code is in
 `support/personalize.lua`.
 
+## Version information
+
+The footers show the document's version and date, from its `\ProvidesFile` line,
+and the git revision. Drafts get a watermark: UNCOMMITTED when tracked files
+have changes, and UNTAGGED when the commit has no tag. This comes from the
+`markversion` package (in the latex-nyu bundle), which asks git through
+`gitinfo-lua` (in TeX Live). That needs LuaLaTeX with `--shell-escape`, which
+`support/latexmkrc` turns on, and a git repository, so run `git init` and
+commit before building. Without them the document still compiles, without the
+revision.
+
 ## Support files
 
 * `command-verbs.tex`: a glossary of IB command terms (explain, prove, …).

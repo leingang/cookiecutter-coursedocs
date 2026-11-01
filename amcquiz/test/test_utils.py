@@ -119,7 +119,7 @@ def run_l3build_doc(
         )
         return fake
 
-    # Init git so vc.lua can read metadata
+    # Init git so markversion can read metadata (through gitinfo-lua)
     try:
         subprocess.run(
             ["git", "init"], cwd=str(gen_dir), check=True, capture_output=True
@@ -141,7 +141,7 @@ def run_l3build_doc(
             capture_output=True,
         )
     except subprocess.CalledProcessError as e:
-        # If git fails, continue — l3build/ vc.lua may still work in some cases
+        # If git fails, continue — the document still compiles, without the revision
         pass
 
     # Run l3build doc

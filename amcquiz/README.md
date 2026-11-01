@@ -58,6 +58,17 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
 
 
 
+# Version information
+
+A footnote under the title shows the document's version and date, from its `\ProvidesFile` line,
+and the git revision. Drafts get a watermark: UNCOMMITTED when tracked files
+have changes, and UNTAGGED when the commit has no tag. This comes from the
+`markversion` package (in the latex-nyu bundle), which asks git through
+`gitinfo-lua` (in TeX Live). That needs LuaLaTeX with `--shell-escape`, which
+`support/latexmkrc` turns on, and a git repository, so run `git init` and
+commit before building. Without them the document still compiles, without the
+revision.
+
 # Testing
 
 ## Automatic testing

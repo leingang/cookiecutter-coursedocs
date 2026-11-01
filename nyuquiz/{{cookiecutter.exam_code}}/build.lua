@@ -42,21 +42,8 @@ end
 
 -- TYPESET FILES
 
--- Run the vc script before generating
-table.insert(typesetsuppfiles,"vc*")
-function docinit_hook()
-    -- uncomment one of these for shell or lua-based 
-    --recording of version control info
-    local cmd = "texlua ./vc.lua -f -m"
-    -- local cmd = "sh ./vc -f -m"
-    print("Running '" .. cmd .. "'")
-    errorlevel = run(typesetdir,cmd)
-    assert(errorlevel == 0, 
-        "Failed with status " .. errorlevel .. ": " .. cmd)
-    return errorlevel
-end
-
--- Typeset with latexmk
+-- Typeset with latexmk. latexmkrc runs lualatex with --shell-escape,
+-- which markversion needs to ask git for the revision.
 table.insert(typesetsuppfiles,"latexmkrc")
 function typeset(file)
     local name = jobname(file)
