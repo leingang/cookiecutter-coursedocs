@@ -141,11 +141,43 @@ local function personal_rows()
     return students, path
 end
 
+-- The watermark that markversion would put on a copy typeset now, or nil.
+-- Same tests as markversion: tracked files changed since the last commit
+-- give UNCOMMITTED; commits since the last tag give UNTAGGED.
+local function watermark()
+    local function git(args)
+        local p = io.popen("git " .. args .. " 2>/dev/null")
+        local out = p:read("a")
+        p:close()
+        return out
+    end
+    if git("status --porcelain=1 --untracked-files=no"):match("%S") then
+        return "UNCOMMITTED", "The repository has uncommitted changes:\n"
+            .. git("status --short --untracked-files=no")
+            .. "Commit them, then tag (l3build bump, say) before personalizing."
+    end
+    local describe = git("describe --tags --always"):gsub("%s+$", "")
+    local tag, count = describe:match("^(.*)%-(%d+)%-g%x+$")
+    if tag then
+        return "UNTAGGED", string.format(
+            "HEAD is %s commit(s) after the tag %s.\n"
+            .. "Tag it (l3build bump, say) before personalizing.", count, tag)
+    end
+    return nil
+end
+
 function personalize(names)
     local students, path = personal_rows()
     if not students then
         print(path) -- the error message
         return 1
+    end
+    -- Printed copies must not carry a watermark.
+    local mark, why = watermark()
+    if mark then
+        print("The personalized copies would be watermarked " .. mark .. ".")
+        print(why)
+        if not options['dry-run'] then return 1 end
     end
     if names and #names > 0 then
         local wanted, selected = {}, {}
@@ -228,9 +260,12 @@ function personalize(names)
             "\\def\\StudentNetID{" .. s.netid .. "}\n",
             personalsetup, "\n", source)
         f:close()
+        local pdf = module .. "-" .. s.netid .. ".qns.pdf"
+        -- The copy's source is the same from run to run, so latexmk would
+        -- keep an old PDF, watermark and all; always typeset afresh.
+        rm(typesetdir, pdf)
         local errorlevel = typeset(copy, typesetdir)
         if errorlevel ~= 0 then return errorlevel end
-        local pdf = module .. "-" .. s.netid .. ".qns.pdf"
         -- don't leave the copy where `l3build doc` would typeset it
         rm(typesetdir, copy)
         -- A copy that uses transparency is slow to print; refuse it (see
