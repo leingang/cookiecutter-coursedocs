@@ -106,7 +106,7 @@ local function personal_rows()
     for _, column in ipairs({"exam", "netid", "name", "version"}) do
         assert(header[column], path .. " has no " .. column .. " column")
     end
-    local students, lines = {}, {}
+    local students, seen = {}, {}
     for i, row in ipairs(rows) do
         local function get(column)
             return (row[header[column]] or ""):match("^%s*(.-)%s*$")
@@ -116,12 +116,26 @@ local function personal_rows()
             local netid = get("netid")
             assert(netid:match("^[a-z]+%d+$"), string.format(
                 "%s line %d: bad NetID \"%s\"", path, line, netid))
-            assert(not lines[netid], string.format(
-                "%s lines %d and %d both give %s a copy of %s",
-                path, lines[netid] or 0, line, netid, module))
-            lines[netid] = line
-            table.insert(students, {netid = netid, name = get("name"),
-                version = get("version"), line = line})
+            local s = {netid = netid, name = get("name"), version = get("version"),
+                exam = get("exam"), line = line}
+            local other = seen[netid]
+            if other then
+                local function describe(r)
+                    return string.format("  line %d: exam \"%s\", version \"%s\"",
+                        r.line, r.exam, r.version)
+                end
+                return nil, table.concat({
+                    string.format("%s: two rows give %s (%s) a copy of %s:",
+                        path, netid, s.name, module),
+                    describe(other), describe(s),
+                    "A student may have only one row for each exam or quiz. Change the "
+                        .. "exam column of one of these rows so that it no longer matches "
+                        .. module .. " (list the exams it is for instead of a wildcard, "
+                        .. "say), or delete it.",
+                }, "\n")
+            end
+            seen[netid] = s
+            table.insert(students, s)
         end
     end
     return students, path
@@ -129,6 +143,10 @@ end
 
 function personalize(names)
     local students, path = personal_rows()
+    if not students then
+        print(path) -- the error message
+        return 1
+    end
     if names and #names > 0 then
         local wanted, selected = {}, {}
         for _, netid in ipairs(names) do wanted[netid] = true end
