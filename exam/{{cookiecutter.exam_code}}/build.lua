@@ -178,6 +178,9 @@ next_version = next_version_latex
 -- and `l3build stamp --dry-run` only prints the commands (options go
 -- before version names: `l3build stamp --dry-run A`).
 -- Run `l3build doc` first: this stamps the PDFs that are already built.
+-- It refuses PDFs that use transparency, which the printers are very slow
+-- with; `ALLOW_TRANSPARENCY=1 l3build stamp` stamps them anyway.  See
+-- support/transparency.lua.
 
 -- Where the stamped copies go, relative to this directory.
 -- The default (nil) is the "stamped" directory in builddir.
@@ -210,6 +213,16 @@ function stamp(names)
     end
     assert(#versions > 0, "Nothing to stamp: stampjobs is empty")
     local outdir = stampdir or (builddir .. "/stamped")
+    -- Check every version before stamping any, so that a transparent PDF
+    -- doesn't leave a partial batch.  See support/transparency.lua.
+    local printable = true
+    for _, v in ipairs(versions) do
+        local pdf = module .. (v ~= "" and ("-" .. v) or "") .. ".qns.pdf"
+        if fileexists(pdf) and not check_transparency(pdf) then
+            printable = false
+        end
+    end
+    if not printable then return 1 end
     for _, v in ipairs(versions) do
         local job = assert(stampjobs[v],
             "No entry for version " .. v .. " in stampjobs")
@@ -541,6 +554,7 @@ personalfile = "../../../Students/personalized-exams.csv"
 -- \StudentName and \StudentNetID.  The .dtx prints them on the cover and
 -- bubble sheet.
 personalsetup = ""
+dofile(supportdir .. "/transparency.lua")
 dofile(supportdir .. "/personalize.lua")
 
 -- l3build install --full will install the pdfs in the directory below

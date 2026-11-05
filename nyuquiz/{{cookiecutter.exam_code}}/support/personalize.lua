@@ -213,10 +213,17 @@ function personalize(names)
         local errorlevel = typeset(copy, typesetdir)
         if errorlevel ~= 0 then return errorlevel end
         local pdf = module .. "-" .. s.netid .. ".qns.pdf"
-        rm(outdir, pdf)
-        cp(pdf, typesetdir, outdir)
         -- don't leave the copy where `l3build doc` would typeset it
         rm(typesetdir, copy)
+        -- A copy that uses transparency is slow to print; refuse it (see
+        -- support/transparency.lua, if build.lua loads it).
+        if check_transparency
+            and not check_transparency(typesetdir .. "/" .. pdf) then
+            rm(typesetdir, pdf)
+            return 1
+        end
+        rm(outdir, pdf)
+        cp(pdf, typesetdir, outdir)
     end
     print("Personalized copies are in " .. outdir)
     return 0

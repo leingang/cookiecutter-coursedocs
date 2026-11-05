@@ -279,6 +279,7 @@ personalfile = "../../../Students/personalized-exams.csv"
 -- \StudentName and \StudentNetID.  The class prints the name and NetID set
 -- with \setstudentname and \setstudentid.
 personalsetup = [[\AddToHook{begindocument/before}{\setstudentname{\StudentName}\setstudentid{\StudentNetID}}]]
+dofile(supportdir .. "/transparency.lua")
 dofile(supportdir .. "/personalize.lua")
 
 -- l3build install --full will install the pdfs in the directory below
