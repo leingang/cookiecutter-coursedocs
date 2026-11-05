@@ -180,6 +180,12 @@ next_version = next_version_latex
 -- run again.  `l3build gradescope --dry-run` only reports what would change,
 -- and `l3build gradescope replace-rubrics headed` passes --replace-rubrics
 -- and --headed to edubag (options go before those words).
+-- `l3build gradescope delete` deletes the exam from Gradescope instead: its
+-- version set (`edubag gradescope client delete-assignment-container`), then
+-- its versions' assignments (`... delete-assignment`), with their outlines,
+-- rubrics and any submissions.  Each step lists what it would delete and asks
+-- first; anything with submissions is refused unless you add `force`.
+-- `l3build gradescope --dry-run delete` only lists them.
 -- Run `l3build doc` first: this uses the files it made.
 -- Questions on the bubble sheet are not on Gradescope; their answer key is
 -- <module>-<version>.qns.key.csv in the build directory.
@@ -214,15 +220,49 @@ local function yaml_string(s)
     return '"' .. s:gsub('\\', '\\\\'):gsub('"', '\\"') .. '"'
 end
 
+local function shell_quote(s)
+    return "'" .. s:gsub("'", "'\\''") .. "'"
+end
+
+-- Delete the exam from Gradescope: the version set, then the assignments.
+local function gradescope_delete(args)
+    local titles = {}
+    for _, pair in ipairs(gradescopeversions) do
+        table.insert(titles, shell_quote(pair[2]))
+    end
+    local client = gradescopecmd .. " gradescope client "
+    local cmds = {
+        client .. "delete-assignment-container " .. gradescopecourse .. " "
+            .. shell_quote(gradescopetitle) .. args,
+        client .. "delete-assignment " .. gradescopecourse .. " "
+            .. table.concat(titles, " ") .. args,
+    }
+    for _, cmd in ipairs(cmds) do
+        print("Running '" .. cmd .. "'")
+        local errorlevel = run(".", cmd)
+        if errorlevel ~= 0 then return errorlevel end
+    end
+    return 0
+end
+
 function gradescope(names)
-    local flags = {["replace-rubrics"] = "--replace-rubrics", headed = "--headed"}
+    -- `delete` deletes the exam instead of setting it up; the other words are
+    -- edubag flags.
+    local delete = false
+    local flags = {["replace-rubrics"] = "--replace-rubrics", headed = "--headed",
+        force = "--force"}
     local args = options['dry-run'] and " --dry-run" or ""
     for _, name in ipairs(names or {}) do
-        args = args .. " " .. assert(flags[name], "Unknown word '" .. name
-            .. "' (use replace-rubrics or headed)")
+        if name == "delete" then
+            delete = true
+        else
+            args = args .. " " .. assert(flags[name], "Unknown word '" .. name
+                .. "' (use delete, force, replace-rubrics or headed)")
+        end
     end
     assert(string.match(gradescopecourse, "^%d+$"),
         "Fill in gradescopecourse, the Gradescope course ID, in build.lua")
+    if delete then return gradescope_delete(args) end
     local entries, frq = {}, false
     for _, pair in ipairs(gradescopeversions) do
         local v, title = pair[1], pair[2]
@@ -266,7 +306,7 @@ end
 
 target_list.gradescope = {
     func = gradescope,
-    help = "Set the exam up on Gradescope"
+    help = "Set the exam up on Gradescope (or delete it from there, with `delete`)"
 }
 
 
