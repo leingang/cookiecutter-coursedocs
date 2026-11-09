@@ -40,6 +40,47 @@ function os.capture(cmd, raw)
     return s
 end
 
+-- WHAT COUNTS AS THE DOCUMENT
+
+-- The files whose changes make a new version of the document, relative to
+-- this folder; a leading "!" leaves a file out.  Changes to the other
+-- files (printers, stamp jobs, Gradescope settings) don't watermark the
+-- document, change the revision in its footer, or stop `l3build
+-- personalize`.  Only this module's tags (from git_tag below) count.
+docpaths = {".", "!build.lua", "!support/personalize.lua", "!support/transparency.lua"}
+
+-- docpaths as git pathspecs from the top of the repository, so that they
+-- work from any folder in it, such as the one the documents are typeset in.
+function docpathspecs()
+    local prefix = os.capture("git rev-parse --show-prefix")
+    local specs = {}
+    for _, path in ipairs(docpaths) do
+        local exclude, rest = path:match("^(!?)(.*)$")
+        rest = (rest == "." or rest == "") and "" or rest
+        local magic = exclude == "!" and ":(top,exclude)" or ":(top)"
+        table.insert(specs, magic .. prefix .. rest)
+    end
+    return specs
+end
+
+function doctagmatch()
+    return module .. "-v*"
+end
+
+-- markversion reads markversion.cfg from the folder the document is
+-- typeset in, so that it asks git only about docpaths and this module's tags.
+function write_markversion_cfg(dir)
+    local items = {}
+    for _, spec in ipairs(docpathspecs()) do
+        table.insert(items, "{" .. spec .. "}")
+    end
+    local f = assert(io.open(dir .. "/markversion.cfg", "w"))
+    f:write("% Written by build.lua: what counts as the document.\n")
+    f:write("\\markversionsetup{paths={" .. table.concat(items, ",") .. "},\n")
+    f:write("  tag-match=" .. doctagmatch() .. "}\n")
+    f:close()
+end
+
 -- TYPESET FILES
 
 -- Typeset with latexmk. latexmkrc runs lualatex with --shell-escape,
@@ -47,6 +88,7 @@ end
 table.insert(typesetsuppfiles,"latexmkrc")
 function typeset(file)
     local name = jobname(file)
+    write_markversion_cfg(typesetdir)
     local cmd = "latexmk -r latexmkrc " .. file
     print("Running '" .. cmd .. "'")
     errorlevel = run(typesetdir,cmd)

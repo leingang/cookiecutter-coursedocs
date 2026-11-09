@@ -142,25 +142,44 @@ local function personal_rows()
 end
 
 -- The watermark that markversion would put on a copy typeset now, or nil.
--- Same tests as markversion: tracked files changed since the last commit
--- give UNCOMMITTED; commits since the last tag give UNTAGGED.
+-- Same tests as markversion, with the files and tags that build.lua says
+-- make up the document (docpathspecs and doctagmatch; without them, the
+-- whole repository and any tag): changes to those files since the last
+-- commit give UNCOMMITTED; commits that changed them since the last tag,
+-- or no tag at all, give UNTAGGED.
 local function watermark()
     local function git(args)
         local p = io.popen("git " .. args .. " 2>/dev/null")
         local out = p:read("a")
         p:close()
-        return out
+        return (out:gsub("%s+$", ""))
     end
-    if git("status --porcelain=1 --untracked-files=no"):match("%S") then
-        return "UNCOMMITTED", "The repository has uncommitted changes:\n"
-            .. git("status --short --untracked-files=no")
+    local spec, match = "", ""
+    if docpathspecs then
+        local quoted = {}
+        for _, s in ipairs(docpathspecs()) do
+            table.insert(quoted, '"' .. s .. '"')
+        end
+        spec = " -- " .. table.concat(quoted, " ")
+    end
+    if doctagmatch then
+        match = ' --match "' .. doctagmatch() .. '"'
+    end
+    if git("status --porcelain=1 --untracked-files=no" .. spec):match("%S") then
+        return "UNCOMMITTED", "The document has uncommitted changes:\n"
+            .. git("status --short --untracked-files=no" .. spec) .. "\n"
             .. "Commit them, then tag (l3build bump, say) before personalizing."
     end
-    local describe = git("describe --tags --always"):gsub("%s+$", "")
-    local tag, count = describe:match("^(.*)%-(%d+)%-g%x+$")
-    if tag then
+    local tag = git("describe --tags --abbrev=0" .. match .. " HEAD")
+    if tag == "" then
+        return "UNTAGGED", "There is no tag" .. (doctagmatch and " like "
+            .. doctagmatch() or "") .. ".\n"
+            .. "Tag it (l3build bump, say) before personalizing."
+    end
+    local count = git('rev-list --count "' .. tag .. '..HEAD"' .. spec)
+    if count ~= "0" then
         return "UNTAGGED", string.format(
-            "HEAD is %s commit(s) after the tag %s.\n"
+            "%s commit(s) since the tag %s changed the document.\n"
             .. "Tag it (l3build bump, say) before personalizing.", count, tag)
     end
     return nil
