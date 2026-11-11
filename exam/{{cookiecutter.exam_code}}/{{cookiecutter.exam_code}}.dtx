@@ -79,7 +79,7 @@
 \date{{ bgroup }}{{ cookiecutter.exam_date | localize_date }}\relax
 {%- for pair in cookiecutter.version_times.split(',') %}
 {%- set v, t = pair.split(':', 1) %}
-%<{{ v | trim }}>, {{ t | trim }}
+%<{%- for gv in v.split(';') -%}{{ gv | trim }}{% if not loop.last %}|{% endif %}{%- endfor -%}>, {{ t | trim }}
 {%- endfor %}
 {{ egroup }}
 {%- else %}
