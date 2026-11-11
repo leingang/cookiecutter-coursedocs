@@ -191,6 +191,24 @@ build directory, never to the module or install directory.
 `l3build personalize --dry-run` shows the plan. The code is in
 `support/personalize.lua`.
 
+## Copies for the coursedata repository
+
+When `coursedata_repo` is set in `build.lua` (from the `coursedata_repo`
+template variable, or `COURSEDATA_REPO=/path/to/repo`), `l3build install --full`
+also copies what the coursedata repository needs to process scans of this
+exam:
+
+* the blank versions that `l3build doc` made, and a personalized copy for each
+  student in the student file (made with `l3build personalize`), to
+  `<coursedata_repo>/data/raw/artifacts/<module>/templates/`;
+* the student file, to `<coursedata_repo>/data/raw/artifacts/personalized-exams.csv`.
+
+Files already there are replaced, never deleted. Nothing is copied if the
+personalized copies would be watermarked (commit and tag first, with
+`l3build bump`, say) or `personalize` fails; the install itself still happens.
+`l3build install --full --dry-run` shows the plan, and `COURSEDATA_REPO=` skips
+the copies. The code is in `support/coursedata.lua`.
+
 ## Version information
 
 The footers show the document's version and date, from its `\ProvidesFile` line,

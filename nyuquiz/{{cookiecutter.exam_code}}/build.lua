@@ -47,7 +47,8 @@ end
 -- files (printers, stamp jobs, Gradescope settings) don't watermark the
 -- document, change the revision in its footer, or stop `l3build
 -- personalize`.  Only this module's tags (from git_tag below) count.
-docpaths = {".", "!build.lua", "!support/personalize.lua", "!support/transparency.lua"}
+docpaths = {".", "!build.lua", "!support/coursedata.lua", "!support/personalize.lua",
+    "!support/transparency.lua"}
 
 -- docpaths as git pathspecs from the top of the repository, so that they
 -- work from any folder in it, such as the one the documents are typeset in.
@@ -363,6 +364,19 @@ personalfile = "../../../Students/personalized-exams.csv"
 personalsetup = [[\AddToHook{begindocument/before}{\setstudentname{\StudentName}\setstudentid{\StudentNetID}}]]
 dofile(supportdir .. "/transparency.lua")
 dofile(supportdir .. "/personalize.lua")
+
+
+-- COPIES FOR THE COURSEDATA REPOSITORY
+-- `l3build install --full` also copies the blank versions and a personalized
+-- copy for each student to <coursedata_repo>/data/raw/artifacts/<module>/templates,
+-- and the student file to <coursedata_repo>/data/raw/artifacts/, for
+-- processing scans.  It copies nothing if the personalized copies would be
+-- watermarked.  See support/coursedata.lua.
+-- The coursedata repository; nil skips these copies.  COURSEDATA_REPO=...
+-- overrides it (COURSEDATA_REPO= skips them too).
+coursedata_repo = os.getenv("COURSEDATA_REPO"){% if cookiecutter.coursedata_repo %}
+    or "{{ cookiecutter.coursedata_repo }}"{% endif %}
+dofile(supportdir .. "/coursedata.lua")
 
 -- l3build install --full will install the pdfs in the directory below
 options['texmfhome'] = "../../../Share/"

@@ -23,6 +23,7 @@
     "extra_tikz_libraries" : "",
     "bundle_name": "",
     "install_dir" : "",
+    "coursedata_repo" : "",
     "_extensions": ["local_extensions.localize_date", "local_extensions.embrace"],
     "_copy_without_render": ["support"]
 }

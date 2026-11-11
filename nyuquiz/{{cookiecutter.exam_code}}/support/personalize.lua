@@ -184,6 +184,8 @@ local function watermark()
     end
     return nil
 end
+-- for other build steps that personalize, such as support/coursedata.lua
+personal_watermark = watermark
 
 function personalize(names)
     local students, path = personal_rows()

@@ -92,6 +92,9 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
 - `install_dir` (string)
     - Optional installation directory used by build scripts; typically left empty for local builds.
 
+- `coursedata_repo` (string)
+    - Optional path to the course's coursedata repository; `l3build install --full` copies templates and personalized copies there (see below). Empty leaves this off.
+
 
 
 # Personalized copies
@@ -118,6 +121,24 @@ build directory, never to the module or install directory.
 `l3build personalize abc123` makes only that copy, and
 `l3build personalize --dry-run` shows the plan. The code is in
 `support/personalize.lua`.
+
+# Copies for the coursedata repository
+
+When `coursedata_repo` is set in `build.lua` (from the `coursedata_repo`
+template variable, or `COURSEDATA_REPO=/path/to/repo`), `l3build install --full`
+also copies what the coursedata repository needs to process scans of this
+quiz:
+
+* the blank versions that `l3build doc` made, and a personalized copy for each
+  student in the student file (made with `l3build personalize`), to
+  `<coursedata_repo>/data/raw/artifacts/<module>/templates/`;
+* the student file, to `<coursedata_repo>/data/raw/artifacts/personalized-exams.csv`.
+
+Files already there are replaced, never deleted. Nothing is copied if the
+personalized copies would be watermarked (commit and tag first, with
+`l3build bump`, say) or `personalize` fails; the install itself still happens.
+`l3build install --full --dry-run` shows the plan, and `COURSEDATA_REPO=` skips
+the copies. The code is in `support/coursedata.lua`.
 
 # Version information
 
