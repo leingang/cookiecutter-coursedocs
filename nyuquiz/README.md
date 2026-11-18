@@ -75,8 +75,16 @@ This template exposes a small set of top-level keys in `cookiecutter.json` which
     per-version docstrip-guarded lines (e.g. for sections that share a date
     but meet at different times). When set, `\date` is wrapped in `\relax`
     followed by one guarded line per version; when empty, `\date` is just
-    the plain `exam_date`.
-    - Example: `"1100:11:00 a.m.,1230:12:30 p.m.,1400:2:00 p.m."`
+    the plain `exam_date`. Versions can be grouped with semicolons to share
+    a time.
+    - Example: `"1100;1230:11:00 a.m.,1400:2:00 p.m."`
+
+- `gradescope_version_labels` (string)
+    - Comma-separated list of `versions:label` pairs, for `{label}` in
+    `gradescope_assignment_format`. Versions can be grouped with semicolons
+    to share a label. A version without a label uses its code.
+    - Example, with the format `"{exam_name} {label}"`:
+    `"1100:Morning Section,1230;1400:Afternoon Sections"`
 
 - `extra_latex_packages` (string)
     - Comma-separated list of additional LaTeX packages to include via `\usepackage{}` in the generated .tex sources.
@@ -167,8 +175,9 @@ After `l3build doc`, `l3build gradescope` sets the quiz up on Gradescope: it
 writes `build/doc/<exam_code>.yml` from the GRADESCOPE settings in
 `build.lua` (the course ID from `gradescope_course_id`, the version set's
 title, and each version's assignment title, made from
-`gradescope_assignment_format`: `{exam_name}`, `{version}` and `{time}` (the
-version's time in `version_times`) are replaced, so
+`gradescope_assignment_format`: `{exam_name}`, `{version}`, `{time}` (the
+version's time in `version_times`) and `{label}` (the version's label in
+`gradescope_version_labels`) are replaced, so
 `"{exam_name} {time} edition"` gives "Quiz 6 9:30 a.m. edition"; the default
 is `"{exam_name} - {version}"`) and runs `edubag gradescope client setup-exam`
 with it. That creates the assignments, saves the outlines, imports the

@@ -521,10 +521,18 @@ gradescopeversions = {
 {%- set gsversions = cookiecutter.versions_csv.split(',') | map('trim') | select | list %}
 {%- set gstimes = {} %}
 {%- for pair in cookiecutter.version_times.split(',') if ':' in pair %}
-{%- set _ = gstimes.update({pair.split(':', 1)[0] | trim: pair.split(':', 1)[1] | trim}) %}
+{%- for gv in pair.split(':', 1)[0].split(';') %}
+{%- set _ = gstimes.update({gv | trim: pair.split(':', 1)[1] | trim}) %}
+{%- endfor %}
+{%- endfor %}
+{%- set gslabels = {} %}
+{%- for pair in cookiecutter.get('gradescope_version_labels', '').split(',') if ':' in pair %}
+{%- for gv in pair.split(':', 1)[0].split(';') %}
+{%- set _ = gslabels.update({gv | trim: pair.split(':', 1)[1] | trim}) %}
+{%- endfor %}
 {%- endfor %}
 {%- for v in gsversions %}
-    {"{{ v }}", "{{ cookiecutter.gradescope_assignment_format | replace('{exam_name}', cookiecutter.exam_name) | replace('{version}', v) | replace('{time}', gstimes.get(v, v)) }}"},
+    {"{{ v }}", "{{ cookiecutter.gradescope_assignment_format | replace('{exam_name}', cookiecutter.exam_name) | replace('{version}', v) | replace('{time}', gstimes.get(v, v)) | replace('{label}', gslabels.get(v, v)) }}"},
 {%- else %}
     {"", "{{ cookiecutter.exam_name }}"},
 {%- endfor %}
