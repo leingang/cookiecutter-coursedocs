@@ -209,6 +209,40 @@ personalized copies would be watermarked (commit and tag first, with
 `l3build install --full --dry-run` shows the plan, and `COURSEDATA_REPO=` skips
 the copies. The code is in `support/coursedata.lua`.
 
+## Uploads to the testing center (AIM)
+
+`l3build aimupload` uploads each personalized copy to the student's session in
+AIM, the Moses Center's testing portal, with `edubag aim client upload-exams`.
+`l3build install --full` runs it too, after the coursedata copies (set
+`aimoninstall = false` to stop that).
+
+A session counts as this exam's when all of these hold:
+
+* its course and section match `course.yml` (any of the sections, for
+  `016+021`);
+* its type is `aimtype` (`{"Exam", "Final"}` by default);
+* its date is on or after the `\date` in the `.dtx` and before the date of the
+  next module like it, so makeups count. `aimdate` and `aimbefore` override
+  these dates.
+
+Each file's title is `<aimexam> · <tag> · <name> (<netid>)`. Because the title
+includes the tag, AIM shows which version each session has:
+
+* A session with no file of this module gets one.
+* A session with an older tag's file gets the new file, and the old one is
+  deleted.
+* A session with this tag's file is skipped.
+* A file uploaded by hand is left alone.
+
+So run it again whenever students book sessions. `l3build aimupload --dry-run`
+shows the plan, `l3build aimupload abc123` uploads one student's copy, and
+`headed` shows the browser.
+
+It refuses to run unless the module is committed and tagged and the personalized
+copies are newer than the tag. Uploads are logged in
+`Students/aim-uploads.json`, outside the repository. The output shows NetIDs
+only. The code is in `support/aim.lua`.
+
 ## Version information
 
 The footers show the document's version and date, from its `\ProvidesFile` line,

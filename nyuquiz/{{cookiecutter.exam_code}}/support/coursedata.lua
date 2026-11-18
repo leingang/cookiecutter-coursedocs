@@ -15,6 +15,9 @@
 -- last tag), or `personalize` fails, the install stops with an error after
 -- installing as usual.  `l3build install --full --dry-run` only shows the
 -- plan.
+--
+-- After these copies, `l3build install --full` also runs `l3build aimupload`
+-- when build.lua loads support/aim.lua (and `aimoninstall` isn't false).
 coursedata_repo = coursedata_repo -- nil (or "") skips all of this
 
 local function copy_file(source, dest)
@@ -110,9 +113,12 @@ end
 local install_func = target_list.install.func
 target_list.install.func = function(names)
     local errorlevel = install_func(names)
-    if errorlevel ~= 0 or not options["full"]
-        or not coursedata_repo or coursedata_repo == "" then
-        return errorlevel
+    if errorlevel ~= 0 or not options["full"] then return errorlevel end
+    if coursedata_repo and coursedata_repo ~= "" then
+        errorlevel = copy_to_coursedata()
+        if errorlevel ~= 0 then return errorlevel end
     end
-    return copy_to_coursedata()
+    -- then the uploads to the testing center (support/aim.lua), if loaded
+    if aimupload and aimoninstall then return aimupload({}) end
+    return 0
 end

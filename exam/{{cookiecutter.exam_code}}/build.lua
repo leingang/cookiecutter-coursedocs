@@ -51,7 +51,7 @@ end
 -- document, change the revision in its footer, or stop `l3build
 -- personalize`.  Only this module's tags (from git_tag below) count.
 docpaths = {".", "!build.lua", "!support/coursedata.lua", "!support/personalize.lua",
-    "!support/transparency.lua"}
+    "!support/transparency.lua", "!support/aim.lua"}
 
 -- docpaths as git pathspecs from the top of the repository, so that they
 -- work from any folder in it, such as the one the documents are typeset in.
@@ -639,6 +639,23 @@ personalfile = "../../../Students/personalized-exams.csv"
 personalsetup = ""
 dofile(supportdir .. "/transparency.lua")
 dofile(supportdir .. "/personalize.lua")
+
+
+-- UPLOADS TO THE TESTING CENTER
+-- `l3build aimupload` uploads the personalized copies to students'
+-- testing-center sessions in AIM (and `install --full` does too); run it
+-- again as students book sessions.  See support/aim.lua.
+-- The exam's name in the uploaded files' titles.
+aimexam = "{{ cookiecutter.exam_name }}"
+-- The sessions' type in AIM: "Quiz", "Exam", or a list like {"Exam", "Final"}.
+aimtype = {"Exam", "Final"}
+-- Sessions from aimdate up to (not including) aimbefore are this one's; nil
+-- means the \date in the .dtx and the date of the next module like it.
+aimdate = nil
+aimbefore = nil
+-- The record of uploads, outside the repository; AIM_LEDGER=... overrides it.
+aimledger = "../../../Students/aim-uploads.json"
+dofile(supportdir .. "/aim.lua")
 
 
 -- COPIES FOR THE COURSEDATA REPOSITORY
